@@ -140,13 +140,13 @@ MyGem.configuration.to_h #=> a Hash
 ### Some caveats
 
 The `to_h` from above is along with `method_missing`, `object_id` and `initialize` the only purposely defined method which you can not overwrite with a configuration value.
-Apart from these methods, you should be able to set pretty much any property name you like. `Configuration` inherits from `BasicObject`, so even standard Ruby method names are available.
+Apart from these methods, you should be able to set pretty much any property name you like. `Configuration` inherits from `BasicObject`, so even `Kernel` and `Object` method names are available.
 
 ## Contributing
 
 YES!
 
-Let's make this awesome. Write tests for your added stuff, bonus points for feature branches. If you don't have to time to write a fix, raise an issue.
+Let's make this awesome. Write tests for your added stuff, bonus points for feature branches. If you don't have the time to write a fix, raise an issue.
 
 ### Copyright
 
