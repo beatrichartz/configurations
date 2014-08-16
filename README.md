@@ -1,4 +1,4 @@
-# Configurations [![Code Climate](https://codeclimate.com/github/beatrichartz/configurations/badges/gpa.svg)](https://codeclimate.com/github/beatrichartz/configurations)
+# Configurations [![Test Coverage](https://codeclimate.com/github/beatrichartz/configurations/badges/coverage.svg)](https://codeclimate.com/github/beatrichartz/configurations) [![Code Climate](https://codeclimate.com/github/beatrichartz/configurations/badges/gpa.svg)](https://codeclimate.com/github/beatrichartz/configurations)
 
 Configurations provides a unified approach to do configurations using the `MyGem.configure do ... end` idiom with the flexibility to do everything from arbitrary configurations to type asserted configurations for your gem or any other ruby code.
 
