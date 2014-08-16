@@ -9,6 +9,5 @@ rvm:
   - 2.1.0
   - rbx
   - jruby-19mode
-  - jruby-head
   
 script: CODECLIMATE_REPO_TOKEN=36cf84c73264d3c361003f66903eec8aa5fb2b3494496f3a9676630518ecc9f9 rake
