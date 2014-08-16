@@ -3,23 +3,36 @@ module Configurations
   #
   class Configuration < BasicObject
 
-    # @!macro [attach] install_kernel_method
-    # @method $1
+    # 1.9 does not allow for method rebinding in another scope
     #
-    def self.install_kernel_method(method)
-      kernel_method = ::Kernel.instance_method(method)
-      define_method method do |*args, &block|
-        kernel_method.bind(self).call(*args, &block)
+    if ::RUBY_VERSION < '2.0.0'
+      include ::Kernel
+      undef :nil?, :===, :=~, :!~, :eql?, :hash, :<=>, :class, :singleton_class, :clone, :dup, :initialize_dup,
+            :initialize_clone, :taint, :tainted?, :untaint, :untrust, :untrusted?, :trust, :freeze, :frozen?,
+            :to_s, :inspect, :methods, :singleton_methods, :protected_methods, :private_methods, :public_methods,
+            :instance_variables, :instance_variable_get, :instance_variable_set, :instance_variable_defined?,
+            :instance_of?, :kind_of?, :tap, :send, :public_send, :respond_to?, :respond_to_missing?, :extend,
+            :display, :method, :public_method, :define_singleton_method, :to_enum, :enum_for
+    else
+      # @!macro [attach] install_kernel_method
+      # @method $1
+      #
+      def self.install_kernel_method(method)
+        kernel_method = ::Kernel.instance_method(method)
+
+        define_method method do |*args, &block|
+          kernel_method.bind(self).call(*args, &block)
+        end
       end
+
+      # Installs the type asserting is_a? method from Kernel
+      #
+      install_kernel_method(:is_a?)
+
+      # Installs the inspect method from Kernel
+      #
+      install_kernel_method(:inspect)
     end
-
-    # Installs the type asserting is_a? method from Kernel
-    #
-    install_kernel_method(:is_a?)
-
-    # Installs the inspect method from Kernel
-    #
-    install_kernel_method(:inspect)
 
     # Initialize a new configuration
     # @param [Proc] configuration_defaults A proc yielding to a default configuration

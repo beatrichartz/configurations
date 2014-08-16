@@ -1,4 +1,4 @@
-# Configurations
+# Configurations [![Code Climate](https://codeclimate.com/github/beatrichartz/configurations/badges/gpa.svg)](https://codeclimate.com/github/beatrichartz/configurations)
 
 Configurations provides a unified approach to do configurations using the `MyGem.configure do ... end` idiom with the flexibility to do everything from arbitrary configurations to type asserted configurations for your gem or any other ruby code.
 
@@ -11,6 +11,10 @@ or with Bundler
 `gem 'configurations', '~> 1.0.0'`
 
 Configurations uses [Semver 2.0](http://semver.org/)
+
+## Compatibility
+
+Compatible with MRI 1.9.2 - 2.1, Rubinius, jRuby
 
 ## Why?
 
@@ -133,7 +137,7 @@ MyGem.configuration.to_h #=> a Hash
 
 ### Some caveats
 
-The `to_h` from above is along with `method_missing` and `initialize` the only purposely defined method which you can not overwrite with a configuration value.
+The `to_h` from above is along with `method_missing`, `object_id` and `initialize` the only purposely defined method which you can not overwrite with a configuration value.
 Apart from these methods, you should be able to set pretty much any property name you like. `Configuration` inherits from `BasicObject`, so even standard Ruby method names are available.
 
 ## Contributing
