@@ -141,3 +141,7 @@ Apart from these methods, you should be able to set pretty much any property nam
 YES!
 
 Let's make this awesome. Write tests for your added stuff, bonus points for feature branches. If you don't have to time to write a fix, raise an issue.
+
+### Copyright
+
+Copyright © 2014 Beat Richartz. See LICENSE.txt for further details.
