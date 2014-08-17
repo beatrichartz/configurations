@@ -64,18 +64,16 @@ module Configurations
         @configurable.is_a?(Hash) && @configurable.has_key?(property)
       end
 
-      # retrievable can be used to retrieve properties from the configuration which use your gem's context
+      # configuration method can be used to retrieve properties from the configuration which use your gem's context
       # @param [Class, Symbol, Hash] properties properties for retrieval
       # @param [Proc] block the block to evaluate
       #
-      def retrievable(*properties, &block)
-        properties.each do |property|
-          raise ArgumentError, "#{property} can not be both configurable and retrievable" if configurable?(property)
+      def configuration_method(method, &block)
+        raise ArgumentError, "#{method} can not be both a configurable property and a configuration method" if configurable?(method)
 
-          Configuration.class_eval do
-            define_method property do
-              block.call(self)
-            end
+        Configuration.class_eval do
+          define_method method do
+            block.call(self)
           end
         end
       end

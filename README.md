@@ -156,16 +156,16 @@ MyGem.configuration.foo #=> 'FOO ooooh my'
 MyGem.configuration.bar.baz #=> one of %w(bi ba bu)
 ```
 
-### Retrievable: Do something with your values
+### Configuration Methods
 
-You might want to access a value on a configuration which doing something with configuration values (a method so to speak).
-This is what `retrievable` is here to help you with:
+You might want to define methods on your configuration which use configuration values to bring out another value.
+This is what `configuration_method` is here to help you with:
 
 ```
 module MyGem
   include Configurations
   configurable :foo, :bar
-  retrievable :foobar do |c|
+  configuration_method :foobar do |c|
     c.foo + c.bar
   end
 end
