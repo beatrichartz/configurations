@@ -98,14 +98,21 @@ module Configurations
       end
     end
 
-    private
-
     # @param [Symbol] property The property to test for configurability
     # @return [Boolean] whether the given property is configurable
     #
     def _configurable?(property)
       _arbitrarily_configurable? or @configurable.has_key?(property)
     end
+
+
+    # @return [Boolean] whether this configuration is arbitrarily configurable
+    #
+    def _arbitrarily_configurable?
+      @configurable.nil? or @configurable.empty?
+    end
+
+    private
 
     # @param [Symbol] property The property to test for
     # @return [Boolean] whether the given property has been configured
@@ -185,12 +192,6 @@ module Configurations
     #
     def _evaluable?(property, evaluation)
       @configurable and @configurable.has_key?(property) and @configurable[property].is_a?(::Hash) and @configurable[property].has_key?(evaluation)
-    end
-
-    # @return [Boolean] whether this configuration is arbitrarily configurable
-    #
-    def _arbitrarily_configurable?
-      @configurable.nil? or @configurable.empty?
     end
 
     # @param [Symbol] method the method to test for

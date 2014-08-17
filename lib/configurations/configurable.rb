@@ -57,6 +57,29 @@ module Configurations
         @configurable.merge!(to_configurable_hash(properties, type, &block))
       end
 
+      # returns whether a property is set to be configurable
+      # @param [Symbol] property the property to ask status for
+      #
+      def configurable?(property)
+        @configurable.is_a?(Hash) && @configurable.has_key?(property)
+      end
+
+      # retrievable can be used to retrieve properties from the configuration which use your gem's context
+      # @param [Class, Symbol, Hash] properties properties for retrieval
+      # @param [Proc] block the block to evaluate
+      #
+      def retrievable(*properties, &block)
+        properties.each do |property|
+          raise ArgumentError, "#{property} can not be both configurable and retrievable" if configurable?(property)
+
+          Configuration.class_eval do
+            define_method property do
+              block.call(self)
+            end
+          end
+        end
+      end
+
       private
 
       # Instantiates a configurable hash from a property and a type

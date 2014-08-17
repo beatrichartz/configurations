@@ -156,6 +156,36 @@ MyGem.configuration.foo #=> 'FOO ooooh my'
 MyGem.configuration.bar.baz #=> one of %w(bi ba bu)
 ```
 
+### Retrievable: Combine multiple configuration values into one
+
+You might want to access a value on a configuration which is aggregating values or other.
+This is what `retrievable` is here to help you with:
+
+```
+module MyGem
+  include Configurations
+  configurable :foo, :bar
+  retrievable :foobar do |c|
+    c.foo + c.bar
+  end
+end
+```
+
+Your users do:
+
+```
+MyGem.configure do |c|
+  c.foo = 'FOO'
+  c.bar = 'BAR'
+end
+```
+
+You get:
+
+```
+MyGem.configuration.foobar #=> 'FOOBAR'
+```
+
 ### Defaults:
 
 ```
