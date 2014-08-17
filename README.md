@@ -156,9 +156,9 @@ MyGem.configuration.foo #=> 'FOO ooooh my'
 MyGem.configuration.bar.baz #=> one of %w(bi ba bu)
 ```
 
-### Retrievable: Combine multiple configuration values into one
+### Retrievable: Do something with your values
 
-You might want to access a value on a configuration which is aggregating values or other.
+You might want to access a value on a configuration which doing something with configuration values (a method so to speak).
 This is what `retrievable` is here to help you with:
 
 ```
