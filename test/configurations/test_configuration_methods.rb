@@ -11,9 +11,19 @@ class TestConfigurationMethods < Minitest::Test
       end
     end
 
+    context = 'CONTEXT'
     configurable :property1, :property2
-    configuration_method :property3 do |c|
-      MyClass.new(c.property1, c.property2)
+    configuration_method :method1 do
+      MyClass.new(property1, property2)
+    end
+    configuration_method :method2 do
+      context + property1.to_s
+    end
+    configuration_method :method3 do |arg|
+      arg + property1.to_s
+    end
+    configuration_method :kernel_raise do
+      raise StandardError, 'hell'
     end
   end
 
@@ -27,7 +37,21 @@ class TestConfigurationMethods < Minitest::Test
   end
 
   def test_configuration_method
-    assert_equal @configuration.property3.props, [:one, :two]
+    assert_equal [:one, :two], @configuration.method1.props
+  end
+
+  def test_configuration_method_with_context
+    assert_equal 'CONTEXTone', @configuration.method2
+  end
+
+  def test_configuration_method_with_arguments
+    assert_equal 'ARGone', @configuration.method3('ARG')
+  end
+
+  def test_kernel_methods_in_configuration_method
+    assert_raises StandardError, 'hell' do
+      @configuration.kernel_raise
+    end
   end
 
   def test_configuration_method_overwrite

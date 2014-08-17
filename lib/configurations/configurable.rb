@@ -72,9 +72,7 @@ module Configurations
         raise ArgumentError, "#{method} can not be both a configurable property and a configuration method" if configurable?(method)
 
         Configuration.class_eval do
-          define_method method do
-            block.call(self)
-          end
+          define_method method, &block
         end
       end
 

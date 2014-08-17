@@ -165,8 +165,8 @@ This is what `configuration_method` is here to help you with:
 module MyGem
   include Configurations
   configurable :foo, :bar
-  configuration_method :foobar do |c|
-    c.foo + c.bar
+  configuration_method :foobar do |arg|
+    foo + bar + arg
   end
 end
 ```
@@ -183,8 +183,9 @@ end
 You get:
 
 ```
-MyGem.configuration.foobar #=> 'FOOBAR'
+MyGem.configuration.foobar('ARG') #=> 'FOOBARARG'
 ```
+
 
 ### Defaults:
 

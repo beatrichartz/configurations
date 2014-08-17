@@ -66,14 +66,14 @@ module Configurations
       elsif !_is_writer?(method) && @_writeable || _configured?(method)
         @configuration[method]
       else
-        super
+        ::Kernel.send(method, *args, &block)
       end
     end
 
     # Respond to missing according to the method_missing implementation
     #
     def respond_to_missing?(method, include_private = false)
-      is_setter?(method) || @_writeable || _configured?(method) || super
+      is_setter?(method) || @_writeable || _configured?(method) || ::Kernel.respond_to_missing?(method, include_private)
     end
 
     # Set the configuration to writeable or read only. Access to writer methods is only allowed within the
