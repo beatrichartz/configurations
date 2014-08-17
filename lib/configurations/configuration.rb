@@ -60,7 +60,7 @@ module Configurations
     def method_missing(method, *args, &block)
       property = method.to_s[0..-2].to_sym
 
-      if _is_writer?(method) && _configurable?(property)
+      if _is_writer?(method) && @_writeable && _configurable?(property)
         _assert_type!(property, args.first)
         @configuration[property] = args.first
       elsif !_is_writer?(method) && @_writeable || _configured?(method)

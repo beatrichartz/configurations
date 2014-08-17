@@ -20,8 +20,10 @@ module Configurations
         class << self
           # The central configure method
           # @params [Proc] block the block to configure host module with
+          # @raise [ArgumentError] error when not given a block
           #
           def configure(&block)
+            raise ArgumentError, 'can not configure without a block' unless block_given?
             @configuration = #{self}::Configuration.new(@configuration_defaults, @configurable, &block)
           end
         end

@@ -51,6 +51,12 @@ class TestConfiguration < Minitest::Test
       }, @configuration.to_h)
   end
 
+  def test_not_configurable_unless_block_given
+    assert_raises ArgumentError do
+      ConfigurationTestModule.configure
+    end
+  end
+
   def test_defaults
     assert_equal 'PUH', @configuration.pah
   end
