@@ -3,6 +3,9 @@ require 'test_helper'
 class TestConfiguration < Minitest::Test
 
   ConfigurationTestModule = testmodule_for(Configurations)
+  ConfigurationDefaultTestModule = testmodule_for(Configurations)
+  ConfigurationNoDefaultTestModule = testmodule_for(Configurations)
+
   ConfigurationTestModule.module_eval do
     configuration_defaults do |c|
       c.uh.this.is.neat = 'NEAT'
@@ -11,6 +14,13 @@ class TestConfiguration < Minitest::Test
       c.overwriteee = 'BLA'
     end
   end
+
+  ConfigurationDefaultTestModule.module_eval do
+    configuration_defaults do |c|
+      c.set = 'SET'
+    end
+  end
+
   def setup
     ConfigurationTestModule.configure do |c|
       c.basic = 'BASIC'
@@ -59,6 +69,14 @@ class TestConfiguration < Minitest::Test
 
   def test_defaults
     assert_equal 'PUH', @configuration.pah
+  end
+
+  def test_defaults_without_configure
+    assert_equal 'SET', ConfigurationDefaultTestModule.configuration.set
+  end
+
+  def test_no_defaults_without_configure
+    assert_nil ConfigurationNoDefaultTestModule.configuration
   end
 
   def test_defaults_overwrite

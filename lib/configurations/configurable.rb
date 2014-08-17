@@ -35,7 +35,9 @@ module Configurations
     module ClassMethods
       # A reader for Configuration
       #
-      attr_reader :configuration
+      def configuration
+        @configuration ||= @configuration_defaults && configure { }
+      end
 
       # Configuration defaults can be used to set the defaults of any Configuration
       # @param [Proc] block setting the default values of the configuration
