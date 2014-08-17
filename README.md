@@ -112,11 +112,41 @@ MyGem.configure do |c|
 end
 ```
 
+### Fourth way: Custom asserted or changed values
+
+If you need further assertions or you need to change a value before it gets stored in the configuration, consider passing a block
+
+```
+module MyGem
+  include Configurations
+  configurable :foo do |value|
+    # The return value is what gets assigned, unless it is nil, in which case the original value persists
+    value + ' ooooh my'
+  end
+  configurable String, bar: :baz do |value|
+    # value is guaranteed to be a string at this point
+    raise ArgumentError, 'baz needs to be one of bi, ba, bu' unless %w(bi ba bu).include?(value)
+  end
+end
+```
+
+Gives your users:
+
+```
+MyGem.configure do |c|
+  c.foo = 'FOO'
+  c.bar.baz = %w(bi)
+
+  # This would raise the ArgumentError in the block
+  # c.bar.baz = %w(boooh)
+end
+```
+
 Gives you:
 
 ```
-MyGem.configuration.foo #=> 100% String
-MyGem.configuration.bar.baz #=> 100% Array
+MyGem.configuration.foo #=> 'FOO ooooh my'
+MyGem.configuration.bar.baz #=> one of %w(bi ba bu)
 ```
 
 ### Defaults:

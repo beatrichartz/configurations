@@ -49,11 +49,12 @@ module Configurations
       # configurable can be used to set the properties which should be configurable, as well as a type which
       # the given property should be asserted to
       # @param [Class, Symbol, Hash] properties a type as a first argument to type assert (if any) or nested properties to allow for setting
+      # @param [Proc] block a block with arity 2 to evaluate when a property is set. It will be given: property name and value
       #
-      def configurable(*properties)
+      def configurable(*properties, &block)
         type = properties.shift if properties.first.is_a?(Class)
         @configurable ||= {}
-        @configurable.merge!(to_configurable_hash(properties, type))
+        @configurable.merge!(to_configurable_hash(properties, type, &block))
       end
 
       private
@@ -63,8 +64,13 @@ module Configurations
       # @param [Class] type the type to assert, if any
       # @return a hash with configurable values pointing to their types
       #
-      def to_configurable_hash(properties, type)
-        Hash[properties.zip(Array(type) * properties.size)]
+      def to_configurable_hash(properties, type, &block)
+        assertion_hash = {}
+        assertion_hash.merge! block: block if block_given?
+        assertion_hash.merge! type: type if type
+
+        assertions = ([assertion_hash] * properties.size)
+        Hash[properties.zip(assertions)]
       end
     end
   end

@@ -59,10 +59,10 @@ module Configurations
     #
     def method_missing(method, *args, &block)
       property = method.to_s[0..-2].to_sym
+      value = args.first
 
       if _is_writer?(method) && @_writeable && _configurable?(property)
-        _assert_type!(property, args.first)
-        @configuration[property] = args.first
+        _assign!(property, value)
       elsif !_is_writer?(method) && @_writeable || _configured?(method)
         @configuration[method]
       else
@@ -127,10 +127,10 @@ module Configurations
     def _evaluate_configurable!
       return if _arbitrarily_configurable?
 
-      @configurable.each do |k, type|
+      @configurable.each do |k, assertion|
         if k.is_a?(::Hash)
           k.each do |property, nested|
-            @configuration[property] = Configuration.new(nil, _to_configurable_hash(nested, type))
+            @configuration[property] = Configuration.new(nil, _to_configurable_hash(nested, assertion))
           end
         end
       end
@@ -140,9 +140,20 @@ module Configurations
     # @param [Class] type the type to assert, if any
     # @return a hash with configurable values pointing to their types
     #
-    def _to_configurable_hash(value, type)
+    def _to_configurable_hash(value, assertion)
       value = [value] unless value.is_a?(::Array)
-      ::Hash[value.zip([type].flatten*value.size)]
+      ::Hash[value.zip([assertion].flatten*value.size)]
+    end
+
+    # Assigns a value after running the assertions
+    # @param [Symbol] property the property to type test
+    # @param [Any] value the given value
+    #
+    def _assign!(property, value)
+      v = _evaluate_block!(property, value)
+      value = v unless v.nil?
+      _assert_type!(property, value)
+      @configuration[property] = value
     end
 
     # Type assertion for configurable properties
@@ -151,12 +162,29 @@ module Configurations
     # @raise [ConfigurationError] if the given value has the wrong type
     #
     def _assert_type!(property, value)
-      return if _arbitrarily_configurable?
+      return unless _evaluable?(property, :type)
 
-      expected_type = @configurable[property]
-      return if expected_type.nil?
+      assertion = @configurable[property][:type]
+      ::Kernel.raise ConfigurationError, "Expected #{property} to be configured with #{expected_type}, but got #{value.class.inspect}", caller unless value.is_a?(assertion)
+    end
 
-      ::Kernel.raise ConfigurationError, "Expected #{property} to be configured with #{expected_type}, but got #{value.class.inspect}", caller unless value.is_a?(expected_type)
+    # Block assertion for configurable properties
+    # @param [Symbol] property the property to type test
+    # @param [Any] value the given value
+    #
+    def _evaluate_block!(property, value)
+      return value unless _evaluable?(property, :block)
+
+      evaluation = @configurable[property][:block]
+      evaluation.call(value)
+    end
+
+    # @param [Symbol] property The property to test for
+    # @param [Symbol] assertion_type The evaluation type type to test for
+    # @return [Boolean] whether the given property is assertable
+    #
+    def _evaluable?(property, evaluation)
+      @configurable and @configurable.has_key?(property) and @configurable[property].is_a?(::Hash) and @configurable[property].has_key?(evaluation)
     end
 
     # @return [Boolean] whether this configuration is arbitrarily configurable
