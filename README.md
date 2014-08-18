@@ -10,7 +10,7 @@ Configurations provides a unified approach to do configurations using the `MyGem
 
 or with Bundler
 
-`gem 'configurations', '~> 1.0.0'`
+`gem 'configurations', '~> 1.3.0'`
 
 Configurations uses [Semver 2.0](http://semver.org/)
 
