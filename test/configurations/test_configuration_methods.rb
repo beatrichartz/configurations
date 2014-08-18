@@ -61,7 +61,7 @@ class TestConfigurationMethods < Minitest::Test
   end
 
   def test_respond_to_missing_on_kernel_method
-    assert_equal true, @configuration.respond_to_missing?(:puts)
+    assert_equal true, @configuration.respond_to?(:puts)
   end
 
   def test_method_missing_on_non_kernel_method
@@ -70,8 +70,8 @@ class TestConfigurationMethods < Minitest::Test
     end
   end
 
-  def test_respond_to_missing_on_kernel_method
-    assert_equal false, @configuration.respond_to_missing?(:bbaaaaa)
+  def test_respond_to_missing_on_non_kernel_method
+    assert_equal false, @configuration.respond_to?(:bbaaaaa)
   end
 
   def test_configuration_method_overwrite
