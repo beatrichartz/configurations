@@ -35,6 +35,14 @@ class TestStricterConfigurationWithBlock < Minitest::Test
     assert_equal 'bye', @configuration.property4.property6
   end
 
+  def test_evaluates_block_after_type_assertion
+    assert_raises Configurations::ConfigurationError, 'TEST2' do
+      BlocksConfigurationTestModule.configure do |c|
+        c.property4.property5 = :bla
+      end
+    end
+  end
+
   def test_evaluates_block_for_nested_properties_when_set_configurable_with_block
     assert_raises ArgumentError, 'TEST2' do
       BlocksConfigurationTestModule.configure do |c|

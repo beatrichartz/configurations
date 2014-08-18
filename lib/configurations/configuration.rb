@@ -170,9 +170,9 @@ module Configurations
     # @param [Any] value the given value
     #
     def _assign!(property, value)
+      _assert_type!(property, value)
       v = _evaluate_block!(property, value)
       value = v unless v.nil?
-      _assert_type!(property, value)
       @configuration[property] = value
     end
 
