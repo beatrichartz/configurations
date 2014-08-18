@@ -75,7 +75,9 @@ module Configurations
     # Respond to missing according to the method_missing implementation
     #
     def respond_to_missing?(method, include_private = false)
-      is_setter?(method) || @_writeable || _configured?(method) || ::Kernel.respond_to_missing?(method, include_private)
+      _is_writer?(method) && @_writeable && _configurable?(property) ||
+      !_is_writer?(method) && @_writeable || _configured?(method) ||
+      ::Kernel.respond_to?(method, include_private)
     end
 
     # Set the configuration to writeable or read only. Access to writer methods is only allowed within the

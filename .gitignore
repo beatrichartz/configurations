@@ -4,3 +4,4 @@ Gemfile.lock
 doc
 coverage
 *.gem
+.ruby-version
