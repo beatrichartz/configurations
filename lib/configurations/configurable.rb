@@ -54,7 +54,7 @@ module Configurations
       def configurable(*properties, &block)
         type = properties.shift if properties.first.is_a?(Class)
         @configurable ||= {}
-        @configurable.merge!(to_configurable_hash(properties, type, &block))
+        @configurable.merge! to_configurable_hash(properties, type, &block)
       end
 
       # returns whether a property is set to be configurable

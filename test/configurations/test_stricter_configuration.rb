@@ -7,7 +7,10 @@ class TestStricterConfiguration < Minitest::Test
     configurable :property1, :property2
     configurable String, :property3
     configurable Symbol, property4: :property5, property6: [:property7, :property8]
-    configurable Array, property9: { property10: :property11 }
+    configurable Fixnum, property6: :property14
+    configurable Fixnum, property4: :property12
+    configurable Array, property9: { property10: { property11: :property12 } }
+    configurable Hash, property9: { property10: { property11: :property13 } }
   end
 
   def setup
@@ -16,9 +19,12 @@ class TestStricterConfiguration < Minitest::Test
       c.property2 = 'BASIC2'
       c.property3 = 'STRING'
       c.property4.property5 = :something
+      c.property4.property12 = 12
       c.property6.property7 = :anything
       c.property6.property8 = :everything
-      c.property9.property10.property11 = %w(here I am)
+      c.property6.property14 = 555
+      c.property9.property10.property11.property12 = %w(here I am)
+      c.property9.property10.property11.property13 = { hi: :bye }
     end
 
     @configuration = StrictConfigurationTestModule.configuration
@@ -33,13 +39,41 @@ class TestStricterConfiguration < Minitest::Test
     assert_equal :something, @configuration.property4.property5
   end
 
+  def test_configurable_with_nested_calls_and_deeply_nested_property
+    assert_equal 12, @configuration.property4.property12
+  end
+
+  def test_configurable_with_nested_calls_and_added_property
+    assert_equal 555, @configuration.property6.property14
+  end
+
+  def test_configurable_type_assertion_with_nested_calls_and_added_property
+    assert_raises Configurations::ConfigurationError do
+      StrictConfigurationTestModule.configure do |c|
+        c.property6.property14 = ''
+      end
+    end
+  end
+
   def test_configurable_with_same_key_when_set_nested_configurable
     assert_equal :anything, @configuration.property6.property7
     assert_equal :everything, @configuration.property6.property8
   end
 
   def test_configurable_with_deeply_nested_property
-    assert_equal %w(here I am), @configuration.property9.property10.property11
+    assert_equal %w(here I am), @configuration.property9.property10.property11.property12
+  end
+
+  def test_configurable_with_nested_calls_and_deeply_nested_property
+    assert_equal({ hi: :bye }, @configuration.property9.property10.property11.property13)
+  end
+
+  def test_configurable_type_restricted_with_nested_calls_and_deeply_nested_property
+    assert_raises Configurations::ConfigurationError do
+      StrictConfigurationTestModule.configure do |c|
+        c.property9.property10.property11.property13 = ''
+      end
+    end
   end
 
   def test_not_configurable_with_wrong_type

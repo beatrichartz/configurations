@@ -65,8 +65,10 @@ module Configurations
         _assign!(property, value)
       elsif !_is_writer?(method) && @_writeable || _configured?(method)
         @configuration[method]
-      else
+      elsif ::Kernel.respond_to?(method, true)
         ::Kernel.send(method, *args, &block)
+      else
+        super
       end
     end
 
@@ -112,6 +114,11 @@ module Configurations
       @configurable.nil? or @configurable.empty?
     end
 
+    # @return [Hash] the configurations configurable hash
+    def _configurable
+      @configurable
+    end
+
     private
 
     # @param [Symbol] property The property to test for
@@ -137,19 +144,23 @@ module Configurations
       @configurable.each do |k, assertion|
         if k.is_a?(::Hash)
           k.each do |property, nested|
-            @configuration[property] = Configuration.new(nil, _to_configurable_hash(nested, assertion))
+            @configuration[property] = Configuration.new(nil, _configurable_hash(property, nested, assertion))
           end
         end
       end
     end
 
+    # @param [Symbol, Hash, Array] property configurable properties, either single or nested
     # @param [Symbol, Hash, Array] value configurable properties, either single or nested
-    # @param [Class] type the type to assert, if any
+    # @param [Hash] assertions if any
     # @return a hash with configurable values pointing to their types
     #
-    def _to_configurable_hash(value, assertion)
+    def _configurable_hash(property, value, assertion)
       value = [value] unless value.is_a?(::Array)
-      ::Hash[value.zip([assertion].flatten*value.size)]
+      hash  = ::Hash[value.zip([assertion].flatten*value.size)]
+      hash  = @configuration[property]._configurable.merge(hash) if @configuration.has_key?(property)
+
+      hash
     end
 
     # Assigns a value after running the assertions
@@ -172,7 +183,7 @@ module Configurations
       return unless _evaluable?(property, :type)
 
       assertion = @configurable[property][:type]
-      ::Kernel.raise ConfigurationError, "Expected #{property} to be configured with #{expected_type}, but got #{value.class.inspect}", caller unless value.is_a?(assertion)
+      ::Kernel.raise ConfigurationError, "Expected #{property} to be configured with #{assertion}, but got #{value.class.inspect}", caller unless value.is_a?(assertion)
     end
 
     # Block assertion for configurable properties
