@@ -61,11 +61,11 @@ module Configurations
       property = method.to_s[0..-2].to_sym
       value = args.first
 
-      if _is_writer?(method) && @_writeable && _configurable?(property)
+      if _respond_to_writer?(method)
         _assign!(property, value)
-      elsif !_is_writer?(method) && @_writeable || _configured?(method)
+      elsif _respond_to_property?(method)
         @configuration[method]
-      elsif ::Kernel.respond_to?(method, true)
+      elsif _can_delegate_to_kernel?(method)
         ::Kernel.send(method, *args, &block)
       else
         super
@@ -74,10 +74,8 @@ module Configurations
 
     # Respond to missing according to the method_missing implementation
     #
-    def respond_to_missing?(method, include_private = false)
-      (_is_writer?(method) && @_writeable && _configurable?(property)) ||
-      (!_is_writer?(method) && @_writeable || _configured?(method)) ||
-      ::Kernel.respond_to?(method, include_private) || super
+    def respond_to?(method, include_private = false)
+      _respond_to_writer?(method) or _respond_to_property?(method) or _can_delegate_to_kernel?(method) or super
     end
 
     # Set the configuration to writeable or read only. Access to writer methods is only allowed within the
@@ -212,6 +210,34 @@ module Configurations
     #
     def _is_writer?(method)
       method.to_s.end_with?('=')
+    end
+
+    # @param [Symbol] method the method to test for
+    # @return [Boolean] whether the configuration responds to the given method writer
+    #
+    def _respond_to_writer?(method)
+      _is_writer?(method) and @_writeable and _configurable?(_property_from_writer(method))
+    end
+
+    # @param [Symbol] method the method to test for
+    # @return [Boolean] whether the configuration responds to the given property as a method
+    #
+    def _respond_to_property?(method)
+      not _is_writer?(method) and (@_writeable or _configured?(method))
+    end
+
+    # @param [Symbol] method the method to test for
+    # @return [Boolean] whether the configuration can delegate the given method to Kernel
+    #
+    def _can_delegate_to_kernel?(method)
+      ::Kernel.respond_to?(method, true)
+    end
+
+    # @param [Symbol] method the writer method to turn into a property
+    # @return [Symbol] the property derived from the writer method
+    #
+    def _property_from_writer(method)
+      method.to_s[0..-2].to_sym
     end
 
   end

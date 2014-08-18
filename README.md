@@ -206,7 +206,7 @@ MyGem.configuration.to_h #=> a Hash
 
 ### Some caveats
 
-The `to_h` from above is along with `method_missing`, `object_id` and `initialize` the only purposely defined method which you can not overwrite with a configuration value.
+The `to_h` from above is along with `method_missing`, `object_id` and `initialize` the only purposely defined API method which you can not overwrite with a configuration value.
 Apart from these methods, you should be able to set pretty much any property name you like. `Configuration` inherits from `BasicObject`, so even `Kernel` and `Object` method names are available.
 
 ## Contributing

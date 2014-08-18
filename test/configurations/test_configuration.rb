@@ -120,7 +120,17 @@ class TestConfiguration < Minitest::Test
     end
   end
 
-  def test_respond_to_missing_on_kernel_method
+  def test_respond_to_on_writer_while_writeable
+    ConfigurationTestModule.configure do |c|
+      assert_equal true, c.respond_to?(:pah=)
+    end
+  end
+
+  def test_respond_to_on_writer_when_not_writeable
+    assert_equal false, @configuration.respond_to?(:pah=)
+  end
+
+  def test_respond_to_on_kernel_method
     assert_equal true, @configuration.respond_to?(:puts)
   end
 
