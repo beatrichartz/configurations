@@ -114,4 +114,24 @@ class TestConfiguration < Minitest::Test
     end
   end
 
+  def test_method_missing_on_kernel_method
+    assert_raises StandardError do
+      @configuration.raise StandardError
+    end
+  end
+
+  def test_respond_to_missing_on_kernel_method
+    assert_equal true, @configuration.respond_to?(:puts)
+  end
+
+  def test_method_missing_on_non_kernel_method
+    assert_raises NoMethodError do
+      @configuration.blabla
+    end
+  end
+
+  def test_respond_to_missing_on_non_kernel_method
+    assert_equal false, @configuration.respond_to?(:bbaaaaa)
+  end
+
 end

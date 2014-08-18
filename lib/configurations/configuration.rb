@@ -75,8 +75,8 @@ module Configurations
     # Respond to missing according to the method_missing implementation
     #
     def respond_to_missing?(method, include_private = false)
-      _is_writer?(method) && @_writeable && _configurable?(property) ||
-      !_is_writer?(method) && @_writeable || _configured?(method) ||
+      (_is_writer?(method) && @_writeable && _configurable?(property)) ||
+      (!_is_writer?(method) && @_writeable || _configured?(method)) ||
       ::Kernel.respond_to?(method, include_private) || super
     end
 
