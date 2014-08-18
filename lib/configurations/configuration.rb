@@ -14,7 +14,7 @@ module Configurations
             :instance_of?, :kind_of?, :tap, :send, :public_send, :respond_to?, :respond_to_missing?, :extend,
             :display, :method, :public_method, :define_singleton_method, :to_enum, :enum_for
     else
-      # @!macro [attach] install_kernel_method
+      # @macro [attach] install_kernel_method
       # @method $1
       #
       def self.install_kernel_method(method)
@@ -152,7 +152,7 @@ module Configurations
 
     # @param [Symbol, Hash, Array] property configurable properties, either single or nested
     # @param [Symbol, Hash, Array] value configurable properties, either single or nested
-    # @param [Hash] assertions if any
+    # @param [Hash] assertion assertion if any
     # @return a hash with configurable values pointing to their types
     #
     def _configurable_hash(property, value, assertion)

@@ -21,6 +21,10 @@ module Configurations
           # The central configure method
           # @params [Proc] block the block to configure host module with
           # @raise [ArgumentError] error when not given a block
+          # @example Configure a configuration
+          #   MyGem.configure do |c|
+          #     c.foo = :bar
+          #   end
           #
           def configure(&block)
             raise ArgumentError, 'can not configure without a block' unless block_given?
@@ -50,6 +54,14 @@ module Configurations
       # the given property should be asserted to
       # @param [Class, Symbol, Hash] properties a type as a first argument to type assert (if any) or nested properties to allow for setting
       # @param [Proc] block a block with arity 2 to evaluate when a property is set. It will be given: property name and value
+      # @example Define a configurable property
+      #   configurable :foo
+      # @example Define a type asserted, nested property for type String
+      #   configurable String, bar: :baz
+      # @example Define a custom assertion for a property
+      #   configurable biz: %i(bi bu) do |value|
+      #     raise ArgumentError, 'must be one of a, b, c' unless %w(a b c).include?(value)
+      #   end
       #
       def configurable(*properties, &block)
         type = properties.shift if properties.first.is_a?(Class)
@@ -65,8 +77,12 @@ module Configurations
       end
 
       # configuration method can be used to retrieve properties from the configuration which use your gem's context
-      # @param [Class, Symbol, Hash] properties properties for retrieval
+      # @param [Class, Symbol, Hash] method the method to define
       # @param [Proc] block the block to evaluate
+      # @example Define a configuration method 'foobararg' returning configuration properties 'foo' and 'bar' plus an argument
+      #   configuration_method :foobararg do |arg|
+      #     foo + bar + arg
+      #   end
       #
       def configuration_method(method, &block)
         raise ArgumentError, "#{method} can not be both a configurable property and a configuration method" if configurable?(method)
