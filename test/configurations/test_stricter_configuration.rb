@@ -55,6 +55,38 @@ class TestStricterConfiguration < Minitest::Test
     end
   end
 
+  def test_strict_configuration_to_h
+    assert_equal({
+                   property4: {
+                     property5: :something,
+                     property12: 12
+                   },
+                   property6: {
+                     property7: :anything,
+                     property8: :everything,
+                     property14: 555
+                   }, 
+                   property9: {
+                     property10: {
+                       property11: {
+                         property12: %w(here I am), 
+                         property13: {
+                           hi: :bye
+                         }
+                       }
+                     }
+                   }, 
+                   property1: 'BASIC1',
+                   property2: 'BASIC2',
+                   property3: 'STRING'
+                 }, @configuration.to_h)
+  end
+
+  def test_strict_configuration_from_h
+    old_to_h = @configuration.to_h.dup
+    assert_equal(old_to_h, StrictConfigurationTestModule.configure{ |c| c.from_h(old_to_h) }.to_h)
+  end
+
   def test_configurable_with_same_key_when_set_nested_configurable
     assert_equal :anything, @configuration.property6.property7
     assert_equal :everything, @configuration.property6.property8

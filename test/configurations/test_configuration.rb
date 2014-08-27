@@ -40,25 +40,29 @@ class TestConfiguration < Minitest::Test
   end
 
   def test_configuration_to_h
-    assert_equal(
-      {
-        uh:
-          {
-            this: { is: { neat: 'NEAT' } }
-          },
-        pah: 'PUH',
-        overwrite: {
-          this: 'OVERWRITE'
-        },
-        overwriteee: 'YEAH',
-        basic: 'BASIC',
-        class: 'KEY',
-        github: {
-          repo: 'github.com/beatrichartz/configurations',
-          access_key: 'ABCDEF'
-        },
-        something: { else: { entirely: { nested: { deep: { below: 'something' } } } } }
-      }, @configuration.to_h)
+    assert_equal({
+                   uh:
+                   {
+                     this: { is: { neat: 'NEAT' } }
+                   },
+                   pah: 'PUH',
+                   overwrite: {
+                     this: 'OVERWRITE'
+                   },
+                   overwriteee: 'YEAH',
+                   basic: 'BASIC',
+                   class: 'KEY',
+                   github: {
+                     repo: 'github.com/beatrichartz/configurations',
+                     access_key: 'ABCDEF'
+                   },
+                   something: { else: { entirely: { nested: { deep: { below: 'something' } } } } }
+                 }, @configuration.to_h)
+  end
+
+  def test_configuration_from_h
+    old_to_h = @configuration.to_h.dup
+    assert_equal(old_to_h, ConfigurationTestModule.configure{ |c| c.from_h(old_to_h) }.to_h)
   end
 
   def test_not_configurable_unless_block_given

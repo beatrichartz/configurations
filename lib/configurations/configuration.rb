@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 module Configurations
   # Configuration is a blank object in order to allow configuration of various properties including keywords
   #
@@ -97,6 +98,23 @@ module Configurations
         h[k] = v.is_a?(Configuration) ? v.to_h : v
 
         h
+      end
+    end
+
+    # A convenience accessor to instantiate a configuration from a hash
+    # @param [Hash] h the hash to read into the configuration
+    # @return [Configuration] the configuration with values assigned
+    # @note can only be accessed during writeable state (in configure block). Unassignable values are ignored
+    #
+    def from_h(h)
+      raise ArgumentError, 'can not dynamically assign values from a hash' unless @_writeable
+
+      h.each do |property, value|
+        if value.is_a?(::Hash) && _nested?(property)
+          @configuration[property].from_h(value)
+        elsif _configurable?(property)
+          _assign!(property, value)
+        end
       end
     end
 
@@ -203,6 +221,13 @@ module Configurations
     #
     def _evaluable?(property, evaluation)
       @configurable and @configurable.has_key?(property) and @configurable[property].is_a?(::Hash) and @configurable[property].has_key?(evaluation)
+    end
+
+    # @param [Symbol] property The property to test for
+    # @return [Boolean] whether this property is nested
+    #
+    def _nested?(property)
+      _arbitrarily_configurable? or @configuration.has_key?(property) and @configuration[property].is_a?(Configuration)
     end
 
     # @param [Symbol] method the method to test for
