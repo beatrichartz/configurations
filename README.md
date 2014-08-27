@@ -204,6 +204,19 @@ end
 MyGem.configuration.to_h #=> a Hash
 ```
 
+### Configure with a hash where needed
+
+Sometimes your users will have a hash of configuration values which are not handy to press into the block form. In that case, they can use `from_h` inside the `configure` block to either read in the full or a nested configuration.
+
+```
+yaml_hash = YAML.load_file('configuration.yml')
+
+MyGem.configure do |c|
+  c.foo = 'bar'
+  c.baz.from_h(yaml_hash)
+end
+```
+
 ### Some caveats
 
 The `to_h` from above is along with `method_missing`, `object_id` and `initialize` the only purposely defined API method which you can not overwrite with a configuration value.
