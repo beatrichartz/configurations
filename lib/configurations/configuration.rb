@@ -69,9 +69,11 @@ module Configurations
       elsif _can_delegate_to_kernel?(method)
         ::Kernel.send(method, *args, &block)
       else
-        super
+        defaults_to_nil ? nil : super
       end
     end
+
+    attr_accessor :defaults_to_nil
 
     # Respond to missing according to the method_missing implementation
     #
