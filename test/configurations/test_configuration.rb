@@ -35,6 +35,18 @@ class TestConfiguration < Minitest::Test
     @configuration = ConfigurationTestModule.configuration
   end
 
+  def test_defaults_to_nil_when_instructed
+    ConfigurationTestModule.configuration_values_default_to_nil!
+    assert_nil ConfigurationTestModule.configuration.unset_value
+  end
+
+  def test_explicit_values_non_nil_when_defaults_nil
+    ConfigurationTestModule.configure { |c| c.basic = 'BASIC' }
+    ConfigurationTestModule.configuration_values_default_to_nil!
+    assert_nil ConfigurationTestModule.configuration.unset_value
+    assert_equal 'BASIC', ConfigurationTestModule.configuration.basic
+  end
+
   def test_configuration_is_subclass_of_host_module
     assert_equal true, ConfigurationTestModule.const_defined?(:Configuration)
   end

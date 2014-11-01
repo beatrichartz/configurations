@@ -43,6 +43,12 @@ module Configurations
         @configuration ||= @configuration_defaults && configure { }
       end
 
+      # Make unset value return nil instead of erroring
+      #
+      def configuration_values_default_to_nil!
+        configuration.defaults_to_nil = true
+      end
+
       # Configuration defaults can be used to set the defaults of any Configuration
       # @param [Proc] block setting the default values of the configuration
       #
