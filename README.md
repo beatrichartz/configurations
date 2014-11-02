@@ -55,6 +55,13 @@ MyGem.configuration.class #=> 'oooh wow'
 MyGem.configuration.foo.bar.baz #=> 'fizz'
 ```
 
+Undefined properties on an arbitrary configuration will return `nil`
+
+```
+MyGem.configuration.not_set #=> nil
+```
+
+
 ### Second way: Restricted Configuration
 
 If you just want some properties to be configurable, consider this option
@@ -85,6 +92,12 @@ Gives you:
 ```
 MyGem.configuration.foo #=> 'FOO'
 MyGem.configuration.bar.baz #=> 'FIZZ'
+```
+
+Undefined properties on a restricted configuration will raise `NoMethodError`
+
+```
+MyGem.configuration.not_set #=> <#NoMethodError>
 ```
 
 ### Third way: Type Restricted Configuration
@@ -121,18 +134,18 @@ module MyGem
   include Configurations
   configurable :foo do |value|
 
-    # The return value is what gets assigned, unless it is nil,
-    # in which case the original value persists
-    #
-    value + ' ooooh my'
+	# The return value is what gets assigned, unless it is nil,
+	# in which case the original value persists
+	#
+	value + ' ooooh my'
   end
   configurable String, bar: :baz do |value|
 
-    # value is guaranteed to be a string at this point
-    #
-    unless %w(bi ba bu).include?(value)
-      raise ArgumentError, 'baz needs to be one of bi, ba, bu'
-    end
+	# value is guaranteed to be a string at this point
+	#
+	unless %w(bi ba bu).include?(value)
+	  raise ArgumentError, 'baz needs to be one of bi, ba, bu'
+	end
   end
 end
 ```
@@ -166,7 +179,7 @@ module MyGem
   include Configurations
   configurable :foo, :bar
   configuration_method :foobar do |arg|
-    foo + bar + arg
+	foo + bar + arg
   end
 end
 ```
@@ -193,7 +206,7 @@ MyGem.configuration.foobar('ARG') #=> 'FOOBARARG'
 module MyGem
   include Configurations
   configuration_defaults do |c|
-    c.foo.bar.baz = 'BAR'
+	c.foo.bar.baz = 'BAR'
   end
 end
 ```
