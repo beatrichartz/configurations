@@ -143,7 +143,7 @@ module Configurations
     # @return [Boolean] whether the given property has been configured
     #
     def _configured?(property)
-      @configuration.has_key?(property)
+      @configuration.has_key?(property) or (_arbitrarily_configurable? and not _can_delegate_to_kernel?(property))
     end
 
     # @return [Hash] A configuration hash instantiating subhashes if the key is configurable

@@ -25,6 +25,7 @@ class TestConfiguration < Minitest::Test
     ConfigurationTestModule.configure do |c|
       c.basic = 'BASIC'
       c.class = 'KEY'
+      c.puts = 'OH'
       c.overwriteee = 'YEAH'
       c.overwrite.this = 'OVERWRITE'
       c.github.repo = 'github.com/beatrichartz/configurations'
@@ -46,6 +47,7 @@ class TestConfiguration < Minitest::Test
                      this: { is: { neat: 'NEAT' } }
                    },
                    pah: 'PUH',
+                   puts: 'OH',
                    overwrite: {
                      this: 'OVERWRITE'
                    },
@@ -112,16 +114,22 @@ class TestConfiguration < Minitest::Test
     assert_equal 'something', @configuration.something.else.entirely.nested.deep.below
   end
 
-  def test_not_callable_with_undefined_property
-    assert_raises NoMethodError do
-      @configuration.somethings
-    end
+  def test_nil_with_undefined_property
+    assert_nil @configuration.somethings
+  end
+
+  def test_nil_with_undefined_nested_property
+    assert_nil @configuration.somethings.nested.but.still.nil
   end
 
   def test_method_missing_on_kernel_method
     assert_raises StandardError do
       @configuration.raise StandardError
     end
+  end
+
+  def test_overwritten_kernel_method
+    assert_equal 'OH', @configuration.puts
   end
 
   def test_respond_to_on_writer_while_writeable
@@ -135,17 +143,15 @@ class TestConfiguration < Minitest::Test
   end
 
   def test_respond_to_on_kernel_method
-    assert_equal true, @configuration.respond_to?(:puts)
+    assert_equal true, @configuration.respond_to?(:raise)
   end
 
   def test_method_missing_on_non_kernel_method
-    assert_raises NoMethodError do
-      @configuration.blabla
-    end
+    assert_nil @configuration.blabla
   end
 
   def test_respond_to_missing_on_non_kernel_method
-    assert_equal false, @configuration.respond_to?(:bbaaaaa)
+    assert_equal true, @configuration.respond_to?(:bbaaaaa)
   end
 
 end
