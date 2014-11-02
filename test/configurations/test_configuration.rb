@@ -2,11 +2,8 @@ require 'test_helper'
 
 class TestConfiguration < Minitest::Test
 
-  ConfigurationTestModule = testmodule_for(Configurations)
-  ConfigurationDefaultTestModule = testmodule_for(Configurations)
-  ConfigurationNoDefaultTestModule = testmodule_for(Configurations)
-
-  ConfigurationTestModule.module_eval do
+  module ConfigurationTestModule
+    include Configurations
     configuration_defaults do |c|
       c.uh.this.is.neat = 'NEAT'
       c.pah = 'PUH'
@@ -15,9 +12,25 @@ class TestConfiguration < Minitest::Test
     end
   end
 
-  ConfigurationDefaultTestModule.module_eval do
+  module ConfigurationDefaultTestModule
+    include Configurations
     configuration_defaults do |c|
       c.set = 'SET'
+    end
+  end
+
+  module ConfigurationNoDefaultTestModule
+    include Configurations
+  end
+
+  module ConfigurationNotConfiguredTestModule
+    include Configurations
+    configuration_defaults do |c|
+      c.set.set = 'SET'
+    end
+
+    when_not_configured do |property|
+      raise ArgumentError, "#{property} must be configured"
     end
   end
 
@@ -34,6 +47,8 @@ class TestConfiguration < Minitest::Test
     end
 
     @configuration = ConfigurationTestModule.configuration
+    @not_configured_configuration = ConfigurationNotConfiguredTestModule.configuration
+    @defaults_configuration = ConfigurationDefaultTestModule.configuration
   end
 
   def test_configuration_is_subclass_of_host_module
@@ -78,7 +93,7 @@ class TestConfiguration < Minitest::Test
   end
 
   def test_defaults_without_configure
-    assert_equal 'SET', ConfigurationDefaultTestModule.configuration.set
+    assert_equal 'SET', @defaults_configuration.set
   end
 
   def test_no_defaults_without_configure
@@ -122,22 +137,24 @@ class TestConfiguration < Minitest::Test
     assert_nil @configuration.somethings
   end
 
-  def test_respond_to_with_undefined_nested_property
-    assert_equal true, @configuration.somethings.respond_to?(:nested)
+  def test_overwritten_kernel_method
+    assert_equal 'OH', @configuration.puts
   end
 
-  def test_nil_with_undefined_nested_property
-    assert_nil @configuration.somethings.nested.but.still.nil
-  end
-
-  def test_method_missing_on_kernel_method
-    assert_raises StandardError do
-      @configuration.raise StandardError
+  def test_not_configured_callback
+    assert_raises ArgumentError do
+      @not_configured_configuration.something
     end
   end
 
-  def test_overwritten_kernel_method
-    assert_equal 'OH', @configuration.puts
+  def test_nested_not_configured_callback
+    assert_raises ArgumentError do
+      @not_configured_configuration.set.something
+    end
+  end
+
+  def test_nested_configured_property_with_not_configured
+    assert_equal 'SET', @not_configured_configuration.set.set
   end
 
   def test_respond_to_on_writer_while_writeable

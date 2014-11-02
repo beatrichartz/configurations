@@ -2,8 +2,8 @@ require 'test_helper'
 
 class TestStricterConfigurationWithBlock < Minitest::Test
 
-  BlocksConfigurationTestModule = testmodule_for(Configurations)
-  BlocksConfigurationTestModule.module_eval do
+  module BlocksConfigurationTestModule
+    include Configurations
     configurable :property1, :property2 do |value|
       value.to_s + 'oooh'
     end

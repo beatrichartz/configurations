@@ -1,9 +1,9 @@
 require 'test_helper'
 
 class TestStricterConfiguration < Minitest::Test
+  module StrictConfigurationTestModule
+    include Configurations
 
-  StrictConfigurationTestModule = testmodule_for(Configurations)
-  StrictConfigurationTestModule.module_eval do
     configurable :property1, :property2
     configurable String, :property3
     configurable Symbol, property4: :property5, property6: [:property7, :property8]
@@ -11,6 +11,16 @@ class TestStricterConfiguration < Minitest::Test
     configurable Fixnum, property4: :property12
     configurable Array, property9: { property10: { property11: :property12 } }
     configurable Hash, property9: { property10: { property11: :property13 } }
+  end
+
+  module StrictConfigurationTestModuleDefaultsError
+    include Configurations
+
+    configurable :property1, :property2
+
+    when_not_configured do |prop|
+      raise StandardError, 'Problem here'
+    end
   end
 
   def setup
@@ -26,8 +36,12 @@ class TestStricterConfiguration < Minitest::Test
       c.property9.property10.property11.property12 = %w(here I am)
       c.property9.property10.property11.property13 = { hi: :bye }
     end
+    StrictConfigurationTestModuleDefaultsError.configure do |c|
+      c.property1 = 'BASIC3'
+    end
 
     @configuration = StrictConfigurationTestModule.configuration
+    @configuration_defaults_error = StrictConfigurationTestModuleDefaultsError.configuration
   end
 
   def test_configurable_when_set_configurable
@@ -134,6 +148,16 @@ class TestStricterConfiguration < Minitest::Test
     end
   end
 
+  def test_not_configured_callback
+    assert_raises StandardError do
+      @configuration_defaults_error.property2
+    end
+  end
+
+  def test_not_configured_callback_not_triggered_for_configured
+    assert_equal 'BASIC3', @configuration_defaults_error.property1
+  end
+
   def test_not_configurable_with_undefined_nested_property
     assert_raises NoMethodError do
       StrictConfigurationTestModule.configure do |c|
@@ -142,10 +166,8 @@ class TestStricterConfiguration < Minitest::Test
     end
   end
 
-  def test_not_callable_with_undefined_nested_property
-    assert_raises NoMethodError do
-      @configuration.property6.property9
-    end
+  def test_callable_with_undefined_nested_property
+    assert_nil @configuration.property6.property9
   end
 
 end

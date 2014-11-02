@@ -28,7 +28,13 @@ module Configurations
           #
           def configure(&block)
             raise ArgumentError, 'can not configure without a block' unless block_given?
-            @configuration = #{self}::Configuration.new(@configuration_defaults, @configurable, &block)
+            @configuration = #{base.name}::Configuration.new(
+                                                              defaults: @configuration_defaults,
+                                                              methods: @configuration_methods,
+                                                              configurable: @configurable,
+                                                              not_configured: @not_configured_callback,
+                                                              &block
+                                                            )
           end
         end
       EOF
@@ -85,11 +91,14 @@ module Configurations
       #   end
       #
       def configuration_method(method, &block)
-        raise ArgumentError, "#{method} can not be both a configurable property and a configuration method" if configurable?(method)
+        raise ArgumentError, "can not be both a configurable property and a configuration method" if configurable?(method)
+        @configuration_methods ||= {}
+        @configuration_methods.merge! method => block
+      end
 
-        Configuration.class_eval do
-          define_method method, &block
-        end
+
+      def when_not_configured(&block)
+        @not_configured_callback = block
       end
 
       private
