@@ -45,8 +45,8 @@ module Configurations
     # @return [HostModule::Configuration] a configuration
     #
     def initialize(options={}, &block)
-      @_configurable = options[:configurable]
-      @_methods      = options[:methods]
+      @_configurable   = options[:configurable]
+      @_methods        = options[:methods]
       @_not_configured = options[:not_configured]
 
       @_writeable    = true
@@ -75,8 +75,7 @@ module Configurations
       elsif _respond_to_property_for_read?(method)
         @configuration.fetch(method, &_not_configured_callback)
       elsif _has_configuration_method?(method)
-        args << block #rbx complains if block is separate in the arguments list
-        instance_exec(*args, &@_methods[method])
+        _exec_configuration_method!(method, *args, &block)
       elsif _can_delegate_to_kernel?(method)
         ::Kernel.send(method, *args, &block)
       else
@@ -189,6 +188,13 @@ module Configurations
           end
         end
       end
+    end
+
+    # Executes a configuration method
+    #
+    def _exec_configuration_method!(method, *args, &block)
+      args << block #rbx complains if block is separate in the arguments list
+      instance_exec(*args, &@_methods[method])
     end
 
     # @param [Symbol, Hash, Array] property configurable properties, either single or nested
