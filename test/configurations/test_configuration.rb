@@ -114,8 +114,16 @@ class TestConfiguration < Minitest::Test
     assert_equal 'something', @configuration.something.else.entirely.nested.deep.below
   end
 
+  def test_respond_to_with_undefined_property
+    assert_equal true, @configuration.respond_to?(:somethings)
+  end
+
   def test_nil_with_undefined_property
     assert_nil @configuration.somethings
+  end
+
+  def test_respond_to_with_undefined_nested_property
+    assert_equal true, @configuration.somethings.respond_to?(:nested)
   end
 
   def test_nil_with_undefined_nested_property

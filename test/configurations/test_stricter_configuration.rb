@@ -65,17 +65,17 @@ class TestStricterConfiguration < Minitest::Test
                      property7: :anything,
                      property8: :everything,
                      property14: 555
-                   }, 
+                   },
                    property9: {
                      property10: {
                        property11: {
-                         property12: %w(here I am), 
+                         property12: %w(here I am),
                          property13: {
                            hi: :bye
                          }
                        }
                      }
-                   }, 
+                   },
                    property1: 'BASIC1',
                    property2: 'BASIC2',
                    property3: 'STRING'
@@ -122,6 +122,10 @@ class TestStricterConfiguration < Minitest::Test
         c.property4 = {}
       end
     end
+  end
+
+  def test_respond_to_with_undefined_property
+    assert_equal false, @configuration.respond_to?(:property12)
   end
 
   def test_not_callable_with_undefined_property
