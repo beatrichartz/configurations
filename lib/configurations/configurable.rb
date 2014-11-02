@@ -28,7 +28,7 @@ module Configurations
           #
           def configure(&block)
             raise ArgumentError, 'can not configure without a block' unless block_given?
-            @configuration = #{self}::Configuration.new(@configuration_defaults, @configurable, &block)
+            @configuration = #{self}::Configuration.new(@configuration_defaults, @configurable, @configuration_values_default_to_nil, &block)
           end
         end
       EOF
@@ -41,6 +41,12 @@ module Configurations
       #
       def configuration
         @configuration ||= @configuration_defaults && configure { }
+      end
+
+      # Make unset value return nil instead of erroring
+      #
+      def configuration_values_default_to_nil!
+        @configuration_values_default_to_nil = true
       end
 
       # Configuration defaults can be used to set the defaults of any Configuration

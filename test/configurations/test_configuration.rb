@@ -3,6 +3,7 @@ require 'test_helper'
 class TestConfiguration < Minitest::Test
 
   ConfigurationTestModule = testmodule_for(Configurations)
+  DefaultNilTestModule    = testmodule_for(Configurations)
   ConfigurationDefaultTestModule = testmodule_for(Configurations)
   ConfigurationNoDefaultTestModule = testmodule_for(Configurations)
 
@@ -33,6 +34,25 @@ class TestConfiguration < Minitest::Test
     end
 
     @configuration = ConfigurationTestModule.configuration
+  end
+
+  def test_defaults_to_nil_when_instructed
+    DefaultNilTestModule.configuration_values_default_to_nil!
+    assert_nil DefaultNilTestModule.configuration.unset_value
+  end
+
+  def test_explicit_values_non_nil_when_defaults_nil
+    DefaultNilTestModule.configuration_values_default_to_nil!
+    DefaultNilTestModule.configure { |c| c.basic = 'BASIC' }
+    assert_nil DefaultNilTestModule.configuration.unset_value
+    assert_equal 'BASIC', DefaultNilTestModule.configuration.basic
+  end
+
+  def test_nested_values_work_when_defaults_nil
+    DefaultNilTestModule.configuration_values_default_to_nil!
+    DefaultNilTestModule.configure { |c| c.top.nested = true }
+    assert_nil DefaultNilTestModule.configuration.unset_value
+    assert_equal true, DefaultNilTestModule.configuration.top.nested
   end
 
   def test_configuration_is_subclass_of_host_module

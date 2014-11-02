@@ -41,10 +41,11 @@ module Configurations
     # @param [Proc] block a block to configure this configuration with
     # @return [HostModule::Configuration] a configuration
     #
-    def initialize(configuration_defaults, configurable, &block)
+    def initialize(configuration_defaults, configurable, defaults_to_nil, &block)
       @_writeable = true
       @configurable = configurable
       @configuration = _configuration_hash
+      @defaults_to_nil = defaults_to_nil
 
       _evaluate_configurable!
 
@@ -69,9 +70,11 @@ module Configurations
       elsif _can_delegate_to_kernel?(method)
         ::Kernel.send(method, *args, &block)
       else
-        super
+        defaults_to_nil ? nil : super
       end
     end
+
+    attr_reader :defaults_to_nil
 
     # Respond to missing according to the method_missing implementation
     #
@@ -150,7 +153,7 @@ module Configurations
     #
     def _configuration_hash
       ::Hash.new do |h, k|
-        h[k] = Configuration.new(nil, @configurable) if _configurable?(k)
+        h[k] = Configuration.new(nil, @configurable, @defaults_to_nil) if _configurable?(k)
       end
     end
 
@@ -162,7 +165,7 @@ module Configurations
       @configurable.each do |k, assertion|
         if k.is_a?(::Hash)
           k.each do |property, nested|
-            @configuration[property] = Configuration.new(nil, _configurable_hash(property, nested, assertion))
+            @configuration[property] = Configuration.new(nil, _configurable_hash(property, nested, assertion), @defaults_to_nil)
           end
         end
       end

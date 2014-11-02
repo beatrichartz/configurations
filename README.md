@@ -198,6 +198,15 @@ module MyGem
 end
 ```
 
+### Return nil for unset values instead of raising NoMethodError (default behavior)
+
+```
+module MyGem
+  configuration_values_default_to_nil!
+end
+```
+
+
 ### Get a hash if you need it
 
 ```
