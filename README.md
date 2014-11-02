@@ -10,7 +10,7 @@ Configurations provides a unified approach to do configurations using the `MyGem
 
 or with Bundler
 
-`gem 'configurations', '~> 1.4.0'`
+`gem 'configurations', '~> 2.0.0.pre'`
 
 Configurations uses [Semver 2.0](http://semver.org/)
 
@@ -61,6 +61,16 @@ Undefined properties on an arbitrary configuration will return `nil`
 MyGem.configuration.not_set #=> nil
 ```
 
+If you want to define the behaviour for not set properties yourself, use `not_configured`.
+
+```
+module MyGem
+  not_configured do |prop|
+	raise NoMethodError, "#{prop} must be configured"
+  end
+end
+```
+
 
 ### Second way: Restricted Configuration
 
@@ -94,10 +104,20 @@ MyGem.configuration.foo #=> 'FOO'
 MyGem.configuration.bar.baz #=> 'FIZZ'
 ```
 
-Undefined properties on a restricted configuration will raise `NoMethodError`
+Not configured properties on a restricted configuration will raise `NoMethodError`
 
 ```
 MyGem.configuration.not_set #=> <#NoMethodError>
+```
+
+If you want to define the behaviour for not set properties yourself, use `not_configured`. This will only affect properties set to configurable. All not configurable properties will raise `NoMethodError`.
+
+```
+module MyGem
+  not_configured do |prop|
+	warn :not_configured, "Please configure #{prop} or live in danger"
+  end
+end
 ```
 
 ### Third way: Type Restricted Configuration
