@@ -96,8 +96,13 @@ module Configurations
         @configuration_methods.merge! method => block
       end
 
-
-      def when_not_configured(&block)
+      # not_configured defines the behaviour when a property has not been configured
+      # This can be useful for presence validations of certain properties
+      # or behaviour for undefined properties deviating from the original behaviour
+      # @param [Proc] block the block to evaluate
+      # @yield [Symbol] the property that has not been configured
+      #
+      def not_configured(&block)
         @not_configured_callback = block
       end
 

@@ -29,7 +29,7 @@ class TestConfiguration < Minitest::Test
       c.set.set = 'SET'
     end
 
-    when_not_configured do |property|
+    not_configured do |property|
       raise ArgumentError, "#{property} must be configured"
     end
   end

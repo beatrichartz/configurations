@@ -171,6 +171,8 @@ module Configurations
       @_not_configured || ::Proc.new { |key| nil }
     end
 
+    # @return [Boolean] whether the not configured callback has been configured
+    #
     def _not_configured_callback?
       !!@_not_configured
     end

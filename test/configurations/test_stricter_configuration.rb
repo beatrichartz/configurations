@@ -18,7 +18,7 @@ class TestStricterConfiguration < Minitest::Test
 
     configurable :property1, :property2
 
-    when_not_configured do |prop|
+    not_configured do |prop|
       raise StandardError, 'Problem here'
     end
   end
