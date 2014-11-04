@@ -28,13 +28,7 @@ module Configurations
           #
           def configure(&block)
             raise ArgumentError, 'can not configure without a block' unless block_given?
-            @configuration = #{base.name}::Configuration.new(
-                                                              defaults: @configuration_defaults,
-                                                              methods: @configuration_methods,
-                                                              configurable: @configurable,
-                                                              not_configured: @not_configured_callback,
-                                                              &block
-                                                            )
+            @configuration = #{self}::Configuration.new(@configuration_defaults, @configurable, &block)
           end
         end
       EOF
@@ -91,19 +85,11 @@ module Configurations
       #   end
       #
       def configuration_method(method, &block)
-        raise ArgumentError, "can not be both a configurable property and a configuration method" if configurable?(method)
-        @configuration_methods ||= {}
-        @configuration_methods.merge! method => block
-      end
+        raise ArgumentError, "#{method} can not be both a configurable property and a configuration method" if configurable?(method)
 
-      # not_configured defines the behaviour when a property has not been configured
-      # This can be useful for presence validations of certain properties
-      # or behaviour for undefined properties deviating from the original behaviour
-      # @param [Proc] block the block to evaluate
-      # @yield [Symbol] the property that has not been configured
-      #
-      def not_configured(&block)
-        @not_configured_callback = block
+        Configuration.class_eval do
+          define_method method, &block
+        end
       end
 
       private

@@ -3,6 +3,7 @@ module Configurations
   # Configuration is a blank object in order to allow configuration of various properties including keywords
   #
   class Configuration < BasicObject
+
     # 1.9 does not allow for method rebinding in another scope
     #
     if ::RUBY_VERSION < '2.0.0'
@@ -32,32 +33,25 @@ module Configurations
       # Installs the inspect method from Kernel
       #
       install_kernel_method(:inspect)
-
     end
 
     # Initialize a new configuration
-    # @param [Hash] options The options to initialize a configuration with
-    # @option options [Hash] configurable a hash of configurable properties and their asserted types if given
-    # @option options [Hash] methods a hash of method names pointing to procs
-    # @option options [Proc] not_configured a proc to evaluate for not_configured properties
+    # @param [Proc] configuration_defaults A proc yielding to a default configuration
+    # @param [Hash] configurable a hash of configurable properties and their asserted types if given
     # @param [Proc] block a block to configure this configuration with
-    # @yield [HostModule::Configuration] a configuration
     # @return [HostModule::Configuration] a configuration
     #
-    def initialize(options={}, &block)
-      @_configurable   = options[:configurable]
-      @_methods        = options[:methods]
-      @_not_configured = options[:not_configured]
-
-      @_writeable    = true
+    def initialize(configuration_defaults, configurable, &block)
+      @_writeable = true
+      @configurable = configurable
       @configuration = _configuration_hash
 
       _evaluate_configurable!
 
-      instance_eval(&options[:defaults]) if options[:defaults]
+      self.instance_eval(&configuration_defaults) if configuration_defaults
 
       if block
-        instance_eval(&block)
+        self.instance_eval(&block)
         self._writeable = false
       end
     end
@@ -70,12 +64,8 @@ module Configurations
 
       if _respond_to_writer?(method)
         _assign!(property, value)
-      elsif _respond_to_property_for_write?(method)
+      elsif _respond_to_property?(method)
         @configuration[method]
-      elsif _respond_to_property_for_read?(method)
-        @configuration.fetch(method, &_not_configured_callback)
-      elsif _has_configuration_method?(method)
-        _exec_configuration_method!(method, *args, &block)
       elsif _can_delegate_to_kernel?(method)
         ::Kernel.send(method, *args, &block)
       else
@@ -86,7 +76,7 @@ module Configurations
     # Respond to missing according to the method_missing implementation
     #
     def respond_to?(method, include_private = false)
-      _respond_to_writer?(method) or _respond_to_property_for_write?(method) or _respond_to_property_for_read?(method) or _can_delegate_to_kernel?(method) or !!super
+      _respond_to_writer?(method) or _respond_to_property?(method) or _can_delegate_to_kernel?(method) or super
     end
 
     # Set the configuration to writeable or read only. Access to writer methods is only allowed within the
@@ -132,19 +122,19 @@ module Configurations
     # @return [Boolean] whether the given property is configurable
     #
     def _configurable?(property)
-      _arbitrarily_configurable? or @_configurable.has_key?(property)
+      _arbitrarily_configurable? or @configurable.has_key?(property)
     end
 
 
     # @return [Boolean] whether this configuration is arbitrarily configurable
     #
     def _arbitrarily_configurable?
-      @_configurable.nil? or @_configurable.empty?
+      @configurable.nil? or @configurable.empty?
     end
 
     # @return [Hash] the configurations configurable hash
     def _configurable
-      @_configurable
+      @configurable
     end
 
     private
@@ -153,27 +143,15 @@ module Configurations
     # @return [Boolean] whether the given property has been configured
     #
     def _configured?(property)
-      @configuration.has_key?(property) or _not_configured_callback? or _arbitrarily_configurable?
+      @configuration.has_key?(property)
     end
 
     # @return [Hash] A configuration hash instantiating subhashes if the key is configurable
     #
     def _configuration_hash
       ::Hash.new do |h, k|
-        h[k] = Configuration.new(configurable: @_configurable, not_configured: @_not_configured) if _configurable?(k)
+        h[k] = Configuration.new(nil, @configurable) if _configurable?(k)
       end
-    end
-
-    # @return [Proc] The not_configured callback
-    #
-    def _not_configured_callback
-      @_not_configured || ::Proc.new { |key| nil }
-    end
-
-    # @return [Boolean] whether the not configured callback has been configured
-    #
-    def _not_configured_callback?
-      !!@_not_configured
     end
 
     # Evaluates configurable properties and passes eventual hashes down to subconfigurations
@@ -181,20 +159,13 @@ module Configurations
     def _evaluate_configurable!
       return if _arbitrarily_configurable?
 
-      @_configurable.each do |k, assertion|
+      @configurable.each do |k, assertion|
         if k.is_a?(::Hash)
           k.each do |property, nested|
-            @configuration[property] = Configuration.new(configurable: _configurable_hash(property, nested, assertion), not_configured: _not_configured_callback)
+            @configuration[property] = Configuration.new(nil, _configurable_hash(property, nested, assertion))
           end
         end
       end
-    end
-
-    # Executes a configuration method
-    #
-    def _exec_configuration_method!(method, *args, &block)
-      args << block #rbx complains if block is separate in the arguments list
-      instance_exec(*args, &@_methods[method])
     end
 
     # @param [Symbol, Hash, Array] property configurable properties, either single or nested
@@ -229,7 +200,7 @@ module Configurations
     def _assert_type!(property, value)
       return unless _evaluable?(property, :type)
 
-      assertion = @_configurable[property][:type]
+      assertion = @configurable[property][:type]
       ::Kernel.raise ConfigurationError, "Expected #{property} to be configured with #{assertion}, but got #{value.class.inspect}", caller unless value.is_a?(assertion)
     end
 
@@ -240,7 +211,7 @@ module Configurations
     def _evaluate_block!(property, value)
       return value unless _evaluable?(property, :block)
 
-      evaluation = @_configurable[property][:block]
+      evaluation = @configurable[property][:block]
       evaluation.call(value)
     end
 
@@ -249,7 +220,7 @@ module Configurations
     # @return [Boolean] whether the given property is assertable
     #
     def _evaluable?(property, evaluation)
-      @_configurable and @_configurable.has_key?(property) and @_configurable[property].is_a?(::Hash) and @_configurable[property].has_key?(evaluation)
+      @configurable and @configurable.has_key?(property) and @configurable[property].is_a?(::Hash) and @configurable[property].has_key?(evaluation)
     end
 
     # @param [Symbol] property The property to test for
@@ -266,13 +237,6 @@ module Configurations
       method.to_s.end_with?('=')
     end
 
-    # @param [Symbol] method the method to test for existence
-    # @return [Boolean] whether the method exists as a configuration method
-    #
-    def _has_configuration_method?(method)
-      @_methods and @_methods.has_key?(method)
-    end
-
     # @param [Symbol] method the method to test for
     # @return [Boolean] whether the configuration responds to the given method writer
     #
@@ -281,17 +245,10 @@ module Configurations
     end
 
     # @param [Symbol] method the method to test for
-    # @return [Boolean] whether the configuration responds to the given property as a method during readable state
+    # @return [Boolean] whether the configuration responds to the given property as a method
     #
-    def _respond_to_property_for_read?(method)
-      not _is_writer?(method) and _configured?(method)
-    end
-
-    # @param [Symbol] method the method to test for
-    # @return [Boolean] whether the configuration responds to the given property as a method during writeable state
-    #
-    def _respond_to_property_for_write?(method)
-      not _is_writer?(method) and @_writeable
+    def _respond_to_property?(method)
+      not _is_writer?(method) and (@_writeable or _configured?(method))
     end
 
     # @param [Symbol] method the method to test for
