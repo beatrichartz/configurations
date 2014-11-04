@@ -2,8 +2,9 @@ require 'test_helper'
 
 class TestConfigurationMethods < Minitest::Test
 
-  ConfigurationMethodsClassModule = testmodule_for(Configurations)
-  ConfigurationMethodsClassModule.module_eval do
+  module ConfigurationMethodsClassModule
+    include Configurations
+
     class MyClass
       attr_reader :props
       def initialize(*props)
@@ -27,13 +28,24 @@ class TestConfigurationMethods < Minitest::Test
     end
   end
 
+  module ConfigurationNoMethodsClassModule
+    include Configurations
+
+    configurable :property3
+  end
+
   def setup
     ConfigurationMethodsClassModule.configure do |c|
       c.property1 = :one
       c.property2 = :two
     end
 
+    ConfigurationNoMethodsClassModule.configure do |c|
+      c.property3 = :three
+    end
+
     @configuration = ConfigurationMethodsClassModule.configuration
+    @no_method_configuration = ConfigurationNoMethodsClassModule.configuration
   end
 
   def test_configuration_method
@@ -61,6 +73,12 @@ class TestConfigurationMethods < Minitest::Test
           MyClass.new(c.property2)
         end
       end
+    end
+  end
+
+  def test_configuration_methods_unaffected
+    assert_raises NoMethodError do
+      @no_method_configuration.method3('ARG')
     end
   end
 
