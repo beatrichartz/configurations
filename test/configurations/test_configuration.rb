@@ -2,8 +2,11 @@ require 'test_helper'
 
 class TestConfiguration < Minitest::Test
 
-  module ConfigurationTestModule
-    include Configurations
+  ConfigurationTestModule = testmodule_for(Configurations)
+  ConfigurationDefaultTestModule = testmodule_for(Configurations)
+  ConfigurationNoDefaultTestModule = testmodule_for(Configurations)
+
+  ConfigurationTestModule.module_eval do
     configuration_defaults do |c|
       c.uh.this.is.neat = 'NEAT'
       c.pah = 'PUH'
@@ -12,25 +15,9 @@ class TestConfiguration < Minitest::Test
     end
   end
 
-  module ConfigurationDefaultTestModule
-    include Configurations
+  ConfigurationDefaultTestModule.module_eval do
     configuration_defaults do |c|
       c.set = 'SET'
-    end
-  end
-
-  module ConfigurationNoDefaultTestModule
-    include Configurations
-  end
-
-  module ConfigurationNotConfiguredTestModule
-    include Configurations
-    configuration_defaults do |c|
-      c.set.set = 'SET'
-    end
-
-    not_configured do |property|
-      raise ArgumentError, "#{property} must be configured"
     end
   end
 
@@ -38,7 +25,6 @@ class TestConfiguration < Minitest::Test
     ConfigurationTestModule.configure do |c|
       c.basic = 'BASIC'
       c.class = 'KEY'
-      c.puts = 'OH'
       c.overwriteee = 'YEAH'
       c.overwrite.this = 'OVERWRITE'
       c.github.repo = 'github.com/beatrichartz/configurations'
@@ -47,8 +33,6 @@ class TestConfiguration < Minitest::Test
     end
 
     @configuration = ConfigurationTestModule.configuration
-    @not_configured_configuration = ConfigurationNotConfiguredTestModule.configuration
-    @defaults_configuration = ConfigurationDefaultTestModule.configuration
   end
 
   def test_configuration_is_subclass_of_host_module
@@ -62,7 +46,6 @@ class TestConfiguration < Minitest::Test
                      this: { is: { neat: 'NEAT' } }
                    },
                    pah: 'PUH',
-                   puts: 'OH',
                    overwrite: {
                      this: 'OVERWRITE'
                    },
@@ -93,7 +76,7 @@ class TestConfiguration < Minitest::Test
   end
 
   def test_defaults_without_configure
-    assert_equal 'SET', @defaults_configuration.set
+    assert_equal 'SET', ConfigurationDefaultTestModule.configuration.set
   end
 
   def test_no_defaults_without_configure
@@ -129,32 +112,16 @@ class TestConfiguration < Minitest::Test
     assert_equal 'something', @configuration.something.else.entirely.nested.deep.below
   end
 
-  def test_respond_to_with_undefined_property
-    assert_equal true, @configuration.respond_to?(:somethings)
-  end
-
-  def test_nil_with_undefined_property
-    assert_nil @configuration.somethings
-  end
-
-  def test_overwritten_kernel_method
-    assert_equal 'OH', @configuration.puts
-  end
-
-  def test_not_configured_callback
-    assert_raises ArgumentError do
-      @not_configured_configuration.something
+  def test_not_callable_with_undefined_property
+    assert_raises NoMethodError do
+      @configuration.somethings
     end
   end
 
-  def test_nested_not_configured_callback
-    assert_raises ArgumentError do
-      @not_configured_configuration.set.something
+  def test_method_missing_on_kernel_method
+    assert_raises StandardError do
+      @configuration.raise StandardError
     end
-  end
-
-  def test_nested_configured_property_with_not_configured
-    assert_equal 'SET', @not_configured_configuration.set.set
   end
 
   def test_respond_to_on_writer_while_writeable
@@ -168,15 +135,17 @@ class TestConfiguration < Minitest::Test
   end
 
   def test_respond_to_on_kernel_method
-    assert_equal true, @configuration.respond_to?(:raise)
+    assert_equal true, @configuration.respond_to?(:puts)
   end
 
   def test_method_missing_on_non_kernel_method
-    assert_nil @configuration.blabla
+    assert_raises NoMethodError do
+      @configuration.blabla
+    end
   end
 
   def test_respond_to_missing_on_non_kernel_method
-    assert_equal true, @configuration.respond_to?(:bbaaaaa)
+    assert_equal false, @configuration.respond_to?(:bbaaaaa)
   end
 
 end

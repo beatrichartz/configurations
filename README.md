@@ -10,7 +10,7 @@ Configurations provides a unified approach to do configurations using the `MyGem
 
 or with Bundler
 
-`gem 'configurations', '~> 2.0.0.pre'`
+`gem 'configurations', '~> 1.4.0'`
 
 Configurations uses [Semver 2.0](http://semver.org/)
 
@@ -55,23 +55,6 @@ MyGem.configuration.class #=> 'oooh wow'
 MyGem.configuration.foo.bar.baz #=> 'fizz'
 ```
 
-Undefined properties on an arbitrary configuration will return `nil`
-
-```
-MyGem.configuration.not_set #=> nil
-```
-
-If you want to define the behaviour for not set properties yourself, use `not_configured`.
-
-```
-module MyGem
-  not_configured do |prop|
-	raise NoMethodError, "#{prop} must be configured"
-  end
-end
-```
-
-
 ### Second way: Restricted Configuration
 
 If you just want some properties to be configurable, consider this option
@@ -102,22 +85,6 @@ Gives you:
 ```
 MyGem.configuration.foo #=> 'FOO'
 MyGem.configuration.bar.baz #=> 'FIZZ'
-```
-
-Not configured properties on a restricted configuration will raise `NoMethodError`
-
-```
-MyGem.configuration.not_set #=> <#NoMethodError>
-```
-
-If you want to define the behaviour for not set properties yourself, use `not_configured`. This will only affect properties set to configurable. All not configurable properties will raise `NoMethodError`.
-
-```
-module MyGem
-  not_configured do |prop|
-	warn :not_configured, "Please configure #{prop} or live in danger"
-  end
-end
 ```
 
 ### Third way: Type Restricted Configuration
@@ -154,18 +121,18 @@ module MyGem
   include Configurations
   configurable :foo do |value|
 
-	# The return value is what gets assigned, unless it is nil,
-	# in which case the original value persists
-	#
-	value + ' ooooh my'
+    # The return value is what gets assigned, unless it is nil,
+    # in which case the original value persists
+    #
+    value + ' ooooh my'
   end
   configurable String, bar: :baz do |value|
 
-	# value is guaranteed to be a string at this point
-	#
-	unless %w(bi ba bu).include?(value)
-	  raise ArgumentError, 'baz needs to be one of bi, ba, bu'
-	end
+    # value is guaranteed to be a string at this point
+    #
+    unless %w(bi ba bu).include?(value)
+      raise ArgumentError, 'baz needs to be one of bi, ba, bu'
+    end
   end
 end
 ```
@@ -199,7 +166,7 @@ module MyGem
   include Configurations
   configurable :foo, :bar
   configuration_method :foobar do |arg|
-	foo + bar + arg
+    foo + bar + arg
   end
 end
 ```
@@ -226,7 +193,7 @@ MyGem.configuration.foobar('ARG') #=> 'FOOBARARG'
 module MyGem
   include Configurations
   configuration_defaults do |c|
-	c.foo.bar.baz = 'BAR'
+    c.foo.bar.baz = 'BAR'
   end
 end
 ```
