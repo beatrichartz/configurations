@@ -154,7 +154,9 @@ class TestConfiguration < Minitest::Test
   end
 
   def test_nested_configured_property_with_not_configured
-    assert_equal 'SET', @not_configured_configuration.set.set
+    assert_raises ArgumentError do
+      @not_configured_configuration.set.set
+    end
   end
 
   def test_respond_to_on_writer_while_writeable

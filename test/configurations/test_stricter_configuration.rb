@@ -16,10 +16,14 @@ class TestStricterConfiguration < Minitest::Test
   module StrictConfigurationTestModuleDefaultsError
     include Configurations
 
-    configurable :property1, :property2
+    configurable :property1, :property2, :property3
 
     not_configured do |prop|
       raise StandardError, 'Problem here'
+    end
+
+    not_configured :property3 do |prop|
+      raise ArgumentError, 'Property 3 should be configured'
     end
   end
 
@@ -148,9 +152,15 @@ class TestStricterConfiguration < Minitest::Test
     end
   end
 
-  def test_not_configured_callback
+  def test_default_not_configured_callback
     assert_raises StandardError do
       @configuration_defaults_error.property2
+    end
+  end
+
+  def test_specific_not_configured_callback
+    assert_raises ArgumentError do
+      @configuration_defaults_error.property3
     end
   end
 
@@ -166,8 +176,10 @@ class TestStricterConfiguration < Minitest::Test
     end
   end
 
-  def test_callable_with_undefined_nested_property
-    assert_nil @configuration.property6.property9
+  def test_not_callable_with_undefined_nested_property
+    assert_raises NoMethodError do
+      @configuration.property6.property9
+    end
   end
 
 end

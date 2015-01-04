@@ -28,11 +28,8 @@ module Configurations
           #
           def configure(&block)
             raise ArgumentError, 'can not configure without a block' unless block_given?
-            @configuration = #{base.name}::Configuration.new(
-                                                              defaults: @configuration_defaults,
-                                                              methods: @configuration_methods,
-                                                              configurable: @configurable,
-                                                              not_configured: @not_configured_callback,
+            @configuration = #{base.name}.const_get(configuration_type).new(
+                                                              configuration_options,
                                                               &block
                                                             )
           end
@@ -102,8 +99,21 @@ module Configurations
       # @param [Proc] block the block to evaluate
       # @yield [Symbol] the property that has not been configured
       #
-      def not_configured(&block)
-        @not_configured_callback = block
+      def not_configured(property = nil, &block)
+        @not_configured ||= {}
+        if property.nil?
+          @not_configured.default_proc = ->(h,k){ h[k] = block }
+        else
+          @not_configured.merge! property => block
+        end
+      end
+
+      def configuration_type
+        unless @configurable.nil? || @configurable.empty?
+          'StrictConfiguration'
+        else
+          'ArbitraryConfiguration'
+        end
       end
 
       private
@@ -120,6 +130,15 @@ module Configurations
 
         assertions = ([assertion_hash] * properties.size)
         Hash[properties.zip(assertions)]
+      end
+
+      def configuration_options
+        {
+          defaults: @configuration_defaults,
+          methods: @configuration_methods,
+          configurable: @configurable,
+          not_configured: @not_configured
+        }.delete_if{ |_, value| value.nil? }
       end
     end
   end
