@@ -230,4 +230,4 @@ Let's make this awesome. Write tests for your added stuff, bonus points for feat
 
 ### Copyright
 
-Copyright © 2014 Beat Richartz. See LICENSE.txt for further details.
+Copyright © 2015 Beat Richartz. See LICENSE.txt for further details.
