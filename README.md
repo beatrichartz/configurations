@@ -10,13 +10,13 @@ Configurations provides a unified approach to do configurations using the `MyGem
 
 or with Bundler
 
-`gem 'configurations', '~> 1.4.0'`
+`gem 'configurations', '~> 2.0.0'`
 
 Configurations uses [Semver 2.0](http://semver.org/)
 
 ## Compatibility
 
-Compatible with MRI 1.9.2 - 2.1, Rubinius, jRuby
+Compatible with MRI 1.9.2 - 2.2, Rubinius 2.2, jRuby 1.7 and 9K
 
 ## Why?
 
@@ -55,6 +55,32 @@ MyGem.configuration.class #=> 'oooh wow'
 MyGem.configuration.foo.bar.baz #=> 'fizz'
 ```
 
+Undefined properties on an arbitrary configuration will return `nil`
+
+```
+MyGem.configuration.not_set #=> nil
+```
+
+If you want to define the behaviour for not set properties yourself, use `not_configured`. You can either define a catch-all `not_configured` which will be executed whenever you call a value that has not been configured and has no default:
+
+```
+module MyGem
+  not_configured do |prop|
+	raise NoMethodError, "#{prop} must be configured"
+  end
+end
+```
+
+Or you can define finer-grained callbacks:
+
+```
+module MyGem
+  not_configured my: { nested: :prop } do |prop|
+	raise NoMethodError, "#{prop} must be configured"
+  end
+end
+```
+
 ### Second way: Restricted Configuration
 
 If you just want some properties to be configurable, consider this option
@@ -85,6 +111,22 @@ Gives you:
 ```
 MyGem.configuration.foo #=> 'FOO'
 MyGem.configuration.bar.baz #=> 'FIZZ'
+```
+
+Not configured properties on a restricted configuration will raise `NoMethodError`
+
+```
+MyGem.configuration.not_set #=> <#NoMethodError>
+```
+
+If you want to define the behaviour for not set properties yourself, use `not_configured`. This will only affect properties set to configurable. All not configurable properties will raise `NoMethodError`.
+
+```
+module MyGem
+  not_configured :awesome, :nice do |prop| # omit the arguments to get a catch-all not_configured
+	warn :not_configured, "Please configure #{prop} or live in danger"
+  end
+end
 ```
 
 ### Third way: Type Restricted Configuration
@@ -121,18 +163,18 @@ module MyGem
   include Configurations
   configurable :foo do |value|
 
-    # The return value is what gets assigned, unless it is nil,
-    # in which case the original value persists
-    #
-    value + ' ooooh my'
+	# The return value is what gets assigned, unless it is nil,
+	# in which case the original value persists
+	#
+	value + ' ooooh my'
   end
   configurable String, bar: :baz do |value|
 
-    # value is guaranteed to be a string at this point
-    #
-    unless %w(bi ba bu).include?(value)
-      raise ArgumentError, 'baz needs to be one of bi, ba, bu'
-    end
+	# value is guaranteed to be a string at this point
+	#
+	unless %w(bi ba bu).include?(value)
+	  raise ArgumentError, 'baz needs to be one of bi, ba, bu'
+	end
   end
 end
 ```
@@ -166,7 +208,7 @@ module MyGem
   include Configurations
   configurable :foo, :bar
   configuration_method :foobar do |arg|
-    foo + bar + arg
+	foo + bar + arg
   end
 end
 ```
@@ -186,6 +228,13 @@ You get:
 MyGem.configuration.foobar('ARG') #=> 'FOOBARARG'
 ```
 
+configuration methods can also be installed on nested properties using hashes:
+
+```
+configuration_method foo: :bar do |arg|
+  foo + bar + arg
+end
+```
 
 ### Defaults:
 
@@ -193,7 +242,7 @@ MyGem.configuration.foobar('ARG') #=> 'FOOBARARG'
 module MyGem
   include Configurations
   configuration_defaults do |c|
-    c.foo.bar.baz = 'BAR'
+	c.foo.bar.baz = 'BAR'
   end
 end
 ```
@@ -206,7 +255,7 @@ MyGem.configuration.to_h #=> a Hash
 
 ### Configure with a hash where needed
 
-Sometimes your users will have a hash of configuration values which are not handy to press into the block form. In that case, they can use `from_h` inside the `configure` block to either read in the full or a nested configuration.
+Sometimes your users will have a hash of configuration values which are not handy to press into the block form. In that case, they can use `from_h` inside the `configure` block to either read in the full or a nested configuration. With a everything besides arbitrary configurations, `from_h` can also be used outside the block.
 
 ```
 yaml_hash = YAML.load_file('configuration.yml')
@@ -219,7 +268,7 @@ end
 
 ### Some caveats
 
-The `to_h` from above is along with `method_missing`, `object_id` and `initialize` the only purposely defined API method which you can not overwrite with a configuration value.
+The `to_h` from above is along with `method_missing`, `object_id` and `initialize` and `singleton_class` the only purposely defined API method which you can not overwrite with a configuration value.
 Apart from these methods, you should be able to set pretty much any property name you like. `Configuration` inherits from `BasicObject`, so even `Kernel` and `Object` method names are available.
 
 ## Contributing
