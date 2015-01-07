@@ -7,7 +7,7 @@ module Test
             super
 
             child.extend ClassMethods
-            child.include InstanceMethods
+            child.send :include, InstanceMethods
             child.class_eval <<-CODE
               module TestModule
                 include Configurations
@@ -41,7 +41,12 @@ module Test
         end
 
         def setup_with(*features, &block)
-          features.each { |feature| const_get(:TestModule).module_eval(&method(feature)) }
+          mod = const_get(:TestModule)
+
+          features.each do |feature|
+            method = method(feature)
+            mod.module_eval{ |m| method.call(m) }
+          end
 
           @configuration_block = block if block_given?
         end

@@ -6,6 +6,7 @@ module Configurations
     #
     KEEP_METHODS = [
       :equal?,
+      :object_id,
       :__id__,
       :__send__,
       :method_missing
@@ -26,6 +27,8 @@ module Configurations
       :is_a?,
       :inspect,
       :object_id,
+      # rbx needs the singleton class to access singleton methods
+      :singleton_class,
       *ALIAS_KERNEL_METHODS.keys
     ].freeze
 

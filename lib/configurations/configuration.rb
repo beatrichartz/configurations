@@ -64,6 +64,8 @@ module Configurations
           __assign!(property, value)
         end
       end
+
+      self
     end
 
     # @param [Symbol] property The property to test for configurability
