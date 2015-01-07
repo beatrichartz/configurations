@@ -147,9 +147,9 @@ module Configurations
       #
       def configuration_type
         if @configurable.nil? || @configurable.empty?
-          'ArbitraryConfiguration'
+          :ArbitraryConfiguration
         else
-          'StrictConfiguration'
+          :StrictConfiguration
         end
       end
 

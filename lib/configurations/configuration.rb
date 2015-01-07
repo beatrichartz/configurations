@@ -8,10 +8,7 @@ module Configurations
     # @option options [Hash] methods a hash of method names pointing to procs
     # @option options [Proc] not_configured a proc to evaluate for
     #   not_configured properties
-    # @param [Proc] block a block to configure this configuration with
-    # @yield [HostModule::Configuration] a configuration
-    # @return [HostModule::Configuration] a configuration
-    #
+
     def initialize(options = {}, &block)
       @__methods__ = options.fetch(:methods) { ::Hash.new }
       @__not_configured__ = options.fetch(:not_configured) { ::Hash.new }
