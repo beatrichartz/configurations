@@ -1,7 +1,6 @@
 require 'test_helper'
 
 class TestStrictTypesWithBlocks < ConfigurationsTest
-
   shares_tests :properties, :properties_outside_block, :kernel_methods
   setup_with :strict_types_with_blocks
 
@@ -20,5 +19,4 @@ class TestStrictTypesWithBlocks < ConfigurationsTest
     @configuration.p3.p5.p6 = %w(OUTSIDE BLOCK P3 P5 P6)
     assert_equal %w(P6 P5 P3 BLOCK OUTSIDE), @configuration.p3.p5.p6
   end
-
 end

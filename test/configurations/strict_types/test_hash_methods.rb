@@ -8,5 +8,4 @@ class TestHashMethodsOnStrictTypes < ConfigurationsTest
     old_to_h = @configuration.to_h.dup
     assert_equal(old_to_h, @configuration.from_h(old_to_h).to_h)
   end
-
 end

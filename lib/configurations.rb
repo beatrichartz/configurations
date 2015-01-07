@@ -5,9 +5,10 @@ require_relative 'configurations/arbitrary'
 require_relative 'configurations/strict'
 require_relative 'configurations/configurable'
 
-# Configurations provides a unified approach to do configurations with the flexibility to do everything
-# from arbitrary configurations to type asserted configurations for your gem or any other ruby code.
-# @version 1.0.0
+# Configurations provides a unified approach to do configurations
+# with the flexibility to do everything from arbitrary configurations
+# to type asserted configurations for your gem or any other ruby code.
+# @version 2.0.0
 # @author Beat Richartz
 #
 module Configurations

@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
 module Configurations
-  # Configuration is a blank object in order to allow configuration of various properties including keywords
+  # StrictConfiguration is a blank object with setters and getters defined
+  # according to the configurable settings given
   #
   class StrictConfiguration < Configuration
     # Initialize a new configuration
     # @param [Hash] options The options to initialize a configuration with
-    # @option options [Hash] configurable a hash of configurable properties and their asserted types if given
+    # @option options [Hash] configurable a hash of configurable properties
+    #   and their asserted types if given
     # @option options [Hash] methods a hash of method names pointing to procs
-    # @option options [Proc] not_configured a proc to evaluate for not_configured properties
+    # @option options [Proc] not_configured a proc to evaluate for
+    #   not_configured properties
     # @param [Proc] block a block to configure this configuration with
     # @yield [HostModule::Configuration] a configuration
     # @return [HostModule::Configuration] a configuration
     #
-    def initialize(options={}, &block)
+    def initialize(options = {}, &block)
       @__configurable__   = options.fetch(:configurable)
       __evaluate_configurable!
 
@@ -23,12 +26,14 @@ module Configurations
     # @return [Boolean] whether the given property is configurable
     #
     def __configurable?(property)
-      @__configurable__.key?(property) || @__nested_configurables__.key?(property)
+      @__configurable__.key?(property) ||
+        @__nested_configurables__.key?(property)
     end
 
     private
 
-    # Evaluates configurable properties and passes eventual hashes down to subconfigurations
+    # Evaluates configurable properties and passes eventual hashes
+    # down to subconfigurations
     #
     def __evaluate_configurable!
       @__configurable__.each do |k, assertion|
@@ -44,28 +49,33 @@ module Configurations
     end
 
     def __add_to_nested_configurables!(property, nested, assertion)
-      @__nested_configurables__ ||= ::Hash.new{ |h, k| h[k] = {} }
-      @__nested_configurables__[property].merge! __configurable_hash__(property, nested, assertion)
+      @__nested_configurables__ ||= ::Hash.new { |h, k| h[k] = {} }
+      @__nested_configurables__[property].merge!(
+        __configurable_hash__(property, nested, assertion)
+      )
     end
 
     def __options_hash_for__(property)
       super(property).merge(configurable: @__nested_configurables__[property])
     end
 
-    # @param [Symbol, Hash, Array] property configurable properties, either single or nested
-    # @param [Symbol, Hash, Array] value configurable properties, either single or nested
+    # @param [Symbol, Hash, Array] property configurable properties,
+    #   either single or nested
+    # @param [Symbol, Hash, Array] value configurable properties,
+    #   either single or nested
     # @param [Hash] assertion assertion if any
     # @return a hash with configurable values pointing to their types
     #
-    def __configurable_hash__(property, value, assertion)
+    def __configurable_hash__(_property, value, assertion)
       value = [value] unless value.is_a?(::Array)
-      hash  = ::Hash[value.zip([assertion].flatten*value.size)]
+      hash  = ::Hash[value.zip([assertion].flatten * value.size)]
 
       hash
     end
 
     # @param [Symbol] property the property to test for
-    # @return [Boolean] whether this property is pointing to a nested configuration
+    # @return [Boolean] whether this property is pointing to a
+    #   nested configuration
     #
     def __nested?(property)
       respond_to?(property) && __send__(property).is_a?(__class__)
@@ -97,7 +107,8 @@ module Configurations
       end
     end
 
-    # Installs a property getter for a nested configuration as a singleton method
+    # Installs a property getter for a nested configuration as a
+    # singleton method
     # @param [Symbol] property the property to install the getter for
     #
     def __install_nested_getter__(property)
@@ -126,7 +137,13 @@ module Configurations
       return unless __evaluable?(property, :type)
 
       assertion = @__configurable__[property][:type]
-      ::Kernel.raise ConfigurationError, "Expected #{property} to be configured with #{assertion}, but got #{value.class.inspect}", caller unless value.is_a?(assertion)
+      return if value.is_a?(assertion)
+
+      ::Kernel.fail(
+        ConfigurationError,
+        "#{property} must be configured with #{assertion} (got #{value.class})",
+        caller
+      )
     end
 
     # Block assertion for configurable properties
@@ -145,8 +162,9 @@ module Configurations
     # @return [Boolean] whether the given property is assertable
     #
     def __evaluable?(property, evaluation)
-      __configurable?(property) && @__configurable__[property].is_a?(::Hash) && @__configurable__[property].key?(evaluation)
+      __configurable?(property) &&
+        @__configurable__[property].is_a?(::Hash) &&
+        @__configurable__[property].key?(evaluation)
     end
-
   end
 end

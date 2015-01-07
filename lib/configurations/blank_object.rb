@@ -1,5 +1,4 @@
 module Configurations
-
   # Create a blank object with some kernel methods
   #
   class BlankObject < ::BasicObject
@@ -36,21 +35,18 @@ module Configurations
       undef_method method
     end
 
-    # @return [Module] A Kernel module with only the methods defined in KEEP_KERNEL_METHODS
+    # @return [Module] A Kernel module with only the methods
+    #   defined in KEEP_KERNEL_METHODS
     #
     def self.blank_kernel
       kernel = ::Kernel.dup
 
       ALIAS_KERNEL_METHODS.each do |new_name, old_name|
-        kernel.module_eval do
-          alias_method new_name, old_name
-        end
+        kernel.module_eval { alias_method new_name, old_name }
       end
 
       (kernel.instance_methods - KEEP_KERNEL_METHODS).each do |method|
-        kernel.module_eval do
-          undef_method method
-        end
+        kernel.module_eval { undef_method method }
       end
 
       kernel
@@ -58,5 +54,4 @@ module Configurations
 
     include blank_kernel
   end
-
 end

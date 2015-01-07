@@ -14,7 +14,7 @@ Dir[PATH.join('configurations', 'shared', '*.rb')].each(&method(:require))
 
 class ConfigurationsTest < Minitest::Test
   include Test::Support::Setup
-  extend  Test::Support::Shared
+  extend Test::Support::Shared
 end
 
 require 'minitest/autorun'

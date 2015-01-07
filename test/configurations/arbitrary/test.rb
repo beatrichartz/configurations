@@ -1,7 +1,6 @@
 require 'test_helper'
 
 class TestArbitrary < ConfigurationsTest
-
   shares_tests :properties, :kernel_methods
 
   def test_respond_to_on_writer_while_writeable
@@ -21,5 +20,4 @@ class TestArbitrary < ConfigurationsTest
   def test_respond_to_undefined_property
     assert_respond_to @configuration, :p15
   end
-
 end

@@ -1,7 +1,6 @@
 module Tests
   module Shared
     module PropertiesOutsideBlock
-
       def self.included(base)
         base.setup_with do |c|
           c.p1 = 'CONFIGURED P1'
@@ -10,7 +9,7 @@ module Tests
           c.p3.p5.p6 = %w(P3 P5 P6)
           c.p3.p5.p7 = { config: 'hash' }
           c.class = :class
-          c.module = ->(a){ a }
+          c.module = ->(a) { a }
           c.puts = Class
         end
       end
@@ -36,7 +35,6 @@ module Tests
         @configuration.p3.p5.p6 = %w(OUTSIDE BLOCK P3 P5 P6)
         assert_equal %w(OUTSIDE BLOCK P3 P5 P6), @configuration.p3.p5.p6
       end
-
     end
   end
 end

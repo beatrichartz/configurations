@@ -1,16 +1,14 @@
 module Tests
   module Shared
     module NotConfiguredDefaultCallback
-
       def self.included(base)
         base.setup_with :defaults, :not_configured_default_callback do |c|
           c.p2 = 23
           c.p3.p4 = 'CONFIGURED P3P4'
 
-          c.module = ->{ 'MODULE' }
+          c.module = -> { 'MODULE' }
         end
       end
-
 
       def test_configured_with_default
         assert_equal 'P1', @configuration.p1
@@ -39,7 +37,6 @@ module Tests
           @configuration.p3.p5.p6
         end
       end
-
     end
   end
 end

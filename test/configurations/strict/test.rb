@@ -1,7 +1,6 @@
 require 'test_helper'
 
 class TestStrict < ConfigurationsTest
-
   setup_with :strict
   shares_tests :properties, :properties_outside_block, :kernel_methods
 
@@ -18,5 +17,4 @@ class TestStrict < ConfigurationsTest
   def test_respond_to_undefined_property
     refute_respond_to @configuration, :p15
   end
-
 end

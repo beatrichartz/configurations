@@ -28,16 +28,16 @@ module Test
         end
 
         def configuration_block
-          @configuration_block ||= ->(c) {
+          @configuration_block ||= lambda do |c|
             c.p1 = 'CONFIGURED P1'
             c.p2 = 2
             c.p3.p4 = 'CONFIGURED P3P4'
             c.p3.p5.p6 = %w(P3 P5 P6)
             c.p3.p5.p7 = { config: 'hash' }
             c.class = :class
-            c.module = ->(a){ a }
+            c.module = ->(a) { a }
             c.puts = Class
-          }
+          end
         end
 
         def setup_with(*features, &block)
@@ -60,13 +60,13 @@ module Test
 
         def strict(base)
           base.configurable :p1, :p2, :class, :module, :puts, p3: [
-                              :p4, {
-                                p5: [
-                                  :p6,
-                                  :p7
-                                ]
-                              }
-                            ]
+            :p4, {
+              p5: [
+                :p6,
+                :p7
+              ]
+            }
+          ]
         end
 
         def strict_types(base)
@@ -88,7 +88,7 @@ module Test
               value.abs
             end
             configurable p3: :p4 do |value|
-              lambda{ value }.call
+              lambda { value }.call
             end
             configurable p3: { p5: :p6 } do |value|
               value.reverse
@@ -104,7 +104,7 @@ module Test
               value.abs
             end
             configurable String, p3: :p4 do |value|
-              lambda{ value }.call
+              lambda { value }.call
             end
             configurable Array, p3: { p5: :p6 } do |value|
               value.reverse
@@ -130,7 +130,7 @@ module Test
               arg + p1.to_s
             end
             configuration_method :kernel_raise do
-              raise NotImplementedError, 'KERNEL RAISE'
+              fail NotImplementedError, 'KERNEL RAISE'
             end
             configuration_method p3: { p5: :combination } do
               { a: :b }.merge(p7)
@@ -140,22 +140,21 @@ module Test
 
         def not_configured_callbacks(base)
           base.class_eval do
-            not_configured :p1, :p2, :puts do |prop|
-              raise NotImplementedError
+            not_configured :p1, :p2, :puts do |_prop|
+              fail NotImplementedError
             end
 
-            not_configured p3: { p5: [:p6, :p7] } do |prop|
-              raise NotImplementedError
+            not_configured p3: { p5: [:p6, :p7] } do |_prop|
+              fail NotImplementedError
             end
           end
         end
 
         def not_configured_default_callback(base)
-          base.not_configured do |prop|
-            raise ArgumentError
+          base.not_configured do |_prop|
+            fail ArgumentError
           end
         end
-
       end
 
       module InstanceMethods
@@ -164,7 +163,6 @@ module Test
           @configuration = @module.configure(&self.class.configuration_block)
         end
       end
-
     end
   end
 end

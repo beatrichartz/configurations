@@ -8,5 +8,4 @@ class TestHashMethods < ConfigurationsTest
       @configuration.from_h({})
     end
   end
-
 end

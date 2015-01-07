@@ -1,17 +1,18 @@
 module Configurations
-  # Configuration is a blank object in order to allow configuration of various properties including keywords
+  # Configuration is a blank object in order to allow configuration
+  # of various properties including keywords
   #
   class Configuration < BlankObject
-
     # Initialize a new configuration
     # @param [Hash] options The options to initialize a configuration with
     # @option options [Hash] methods a hash of method names pointing to procs
-    # @option options [Proc] not_configured a proc to evaluate for not_configured properties
+    # @option options [Proc] not_configured a proc to evaluate for
+    #   not_configured properties
     # @param [Proc] block a block to configure this configuration with
     # @yield [HostModule::Configuration] a configuration
     # @return [HostModule::Configuration] a configuration
     #
-    def initialize(options={}, &block)
+    def initialize(options = {}, &block)
       @__methods__ = options.fetch(:methods) { ::Hash.new }
       @__not_configured__ = options.fetch(:not_configured) { ::Hash.new }
 
@@ -39,11 +40,12 @@ module Configurations
       __can_delegate_to_kernel?(method) || super
     end
 
-    # A convenience accessor to get a hash representation of the current state of the configuration
+    # A convenience accessor to get a hash representation of the
+    # current state of the configuration
     # @return [Hash] the configuration in hash form
     #
     def to_h
-      @data.inject({}) do |h, (k,v)|
+      @data.reduce({}) do |h, (k, v)|
         h[k] = v.is_a?(__class__) ? v.to_h : v
 
         h
@@ -67,8 +69,8 @@ module Configurations
     # @param [Symbol] property The property to test for configurability
     # @return [Boolean] whether the given property is configurable
     #
-    def __configurable?(property)
-      raise NotImplementedError, 'must be implemented in subclass'
+    def __configurable?(_property)
+      fail NotImplementedError, 'must be implemented in subclass'
     end
 
     # @param [Symbol] property The property to test for
@@ -85,7 +87,8 @@ module Configurations
 
     protected
 
-    # Installs the given configuration methods for this configuration as singleton methods
+    # Installs the given configuration methods for this configuration
+    # as singleton methods
     #
     def __install_configuration_methods__
       @__methods__.each do |meth, block|
@@ -106,21 +109,24 @@ module Configurations
     end
 
     # @param [Symbol] property the property to return the callback for
-    # @return [Proc] a block to use when property is called before configuration, defaults to a block yielding nil
+    # @return [Proc] a block to use when property is called before
+    #   configuration, defaults to a block yielding nil
     #
     def __not_configured_callback_for__(property)
-      not_configured = @__not_configured__[property] || ::Proc.new{ nil }
+      not_configured = @__not_configured__[property] || ::Proc.new { nil }
 
       unless not_configured.is_a?(::Proc)
         blocks = __collect_blocks__(not_configured)
-        not_configured = ->(property){ blocks.each{ |b| b.call(property) } }
+        not_configured = ->(p) { blocks.each { |b| b.call(p) } }
       end
 
       not_configured
     end
 
-    # @param [Symbol] property the property to return the not configured hash option for
-    # @return [Hash] a hash which can be used as a not configured hash in options
+    # @param [Symbol] property the property to return the not
+    #   configured hash option for
+    # @return [Hash] a hash which can be used as a not configured
+    #   hash in options
     #
     def __not_configured_hash_for__(property)
       hash = ::Hash.new(&@__not_configured__.default_proc)
@@ -129,7 +135,8 @@ module Configurations
       hash
     end
 
-    # @return [Hash] A configuration hash instantiating subhashes if the key is configurable
+    # @return [Hash] A configuration hash instantiating subhashes
+    #   if the key is configurable
     #
     def __configuration_hash__
       ::Hash.new do |h, k|
@@ -157,7 +164,8 @@ module Configurations
     end
 
     # @param [Symbol] method the method to test for
-    # @return [Boolean] whether the configuration can delegate the given method to Kernel
+    # @return [Boolean] whether the configuration can delegate
+    #   the given method to Kernel
     #
     def __can_delegate_to_kernel?(method)
       ::Kernel.respond_to?(method, true)
@@ -176,10 +184,10 @@ module Configurations
     def __collect_blocks__(hash)
       hash.reduce([]) do |array, (k, v)|
         array << if v.is_a?(::Hash)
-          __collect_blocks__(v)
-        else
-          v || k
-        end
+                   __collect_blocks__(v)
+                 else
+                   v || k
+                 end
 
         array
       end.flatten

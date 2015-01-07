@@ -1,7 +1,6 @@
 module Tests
   module Shared
     module HashMethods
-
       def self.included(base)
         base.setup_with do |c|
           c.p1 = 'CONFIGURED P1'
@@ -34,9 +33,8 @@ module Tests
 
       def test_from_h
         old_to_h = @configuration.to_h.dup
-        assert_equal(old_to_h, @module.configure{ |c| c.from_h(old_to_h) }.to_h)
+        assert_equal(old_to_h, @module.configure { |c| c.from_h(old_to_h) }.to_h)
       end
-
     end
   end
 end

@@ -1,7 +1,6 @@
 module Tests
   module Shared
     module Methods
-
       def self.included(base)
         base.setup_with :methods
       end
@@ -27,7 +26,6 @@ module Tests
           @configuration.kernel_raise
         end
       end
-
     end
   end
 end

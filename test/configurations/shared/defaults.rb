@@ -1,14 +1,13 @@
 module Tests
   module Shared
     module Defaults
-
       def self.included(base)
         base.setup_with :defaults do |c|
           c.p2 = 23
 
           c.p3.p4 = 'CONFIGURED P3P4'
 
-          c.module = ->{ 'MODULE' }
+          c.module = -> { 'MODULE' }
         end
       end
 
@@ -39,7 +38,6 @@ module Tests
       def test_no_default_no_write
         assert_nil @configuration.puts
       end
-
     end
   end
 end

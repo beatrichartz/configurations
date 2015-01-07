@@ -1,7 +1,6 @@
 require 'test_helper'
 
 class TestHashMethodsOnStrictWithBlocks < ConfigurationsTest
-
   shares_tests :hash_methods
   setup_with :strict_with_blocks do |c|
     c.p1 = 'CONFIGURED P1'
@@ -20,7 +19,7 @@ class TestHashMethodsOnStrictWithBlocks < ConfigurationsTest
     old_to_h[:p3][:p5][:p6].reverse!
     expected[:puts] = Class
 
-    assert_equal(expected, @module.configure{ |c| c.from_h(old_to_h) }.to_h)
+    assert_equal(expected, @module.configure { |c| c.from_h(old_to_h) }.to_h)
   end
 
   def test_from_h_outside_block
@@ -31,7 +30,7 @@ class TestHashMethodsOnStrictWithBlocks < ConfigurationsTest
   private
 
   def deep_dup(h)
-    h.reduce({}) do |hash, (k,v)|
+    h.reduce({}) do |hash, (k, v)|
       hash[k] = if v.is_a?(Hash)
                   deep_dup(v)
                 else

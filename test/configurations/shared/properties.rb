@@ -1,7 +1,6 @@
 module Tests
   module Shared
     module Properties
-
       def self.included(base)
         base.setup_with do |c|
           c.p1 = 'CONFIGURED P1'
@@ -10,7 +9,7 @@ module Tests
           c.p3.p5.p6 = %w(P3 P5 P6)
           c.p3.p5.p7 = { config: 'hash' }
           c.class = :class
-          c.module = ->(a){ a }
+          c.module = ->(a) { a }
           c.puts = Class
         end
       end
@@ -24,7 +23,7 @@ module Tests
       end
 
       def test_nested_hash_property
-        assert_equal({config: 'hash'}, @configuration.p3.p5.p7)
+        assert_equal({ config: 'hash' }, @configuration.p3.p5.p7)
       end
 
       def test_keyword_property
@@ -42,7 +41,6 @@ module Tests
       def test_respond_to_nested_property
         assert_respond_to @configuration.p3, :p4
       end
-
     end
   end
 end

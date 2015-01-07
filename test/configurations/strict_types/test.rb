@@ -1,7 +1,6 @@
 require 'test_helper'
 
 class TestStrictTypes < ConfigurationsTest
-
   setup_with :strict_types
   shares_tests :properties, :properties_outside_block, :kernel_methods
 
@@ -16,5 +15,4 @@ class TestStrictTypes < ConfigurationsTest
       @configuration.p3.p5.p6 = 'STRING'
     end
   end
-
 end
