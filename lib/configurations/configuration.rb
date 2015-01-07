@@ -5,7 +5,6 @@ module Configurations
 
     # Initialize a new configuration
     # @param [Hash] options The options to initialize a configuration with
-    # @option options [Hash] configurable a hash of configurable properties and their asserted types if given
     # @option options [Hash] methods a hash of method names pointing to procs
     # @option options [Proc] not_configured a proc to evaluate for not_configured properties
     # @param [Proc] block a block to configure this configuration with
@@ -24,7 +23,7 @@ module Configurations
       __install_configuration_methods__
     end
 
-    # Method missing gives access for reading and writing to the underlying configuration hash via dot notation
+    # Method missing gives access to Kernel methods
     #
     def method_missing(method, *args, &block)
       if __can_delegate_to_kernel?(method)
@@ -54,7 +53,6 @@ module Configurations
     # A convenience accessor to instantiate a configuration from a hash
     # @param [Hash] h the hash to read into the configuration
     # @return [Configuration] the configuration with values assigned
-    # @note can only be accessed during writeable state (in configure block). Unassignable values are ignored
     #
     def from_h(h)
       h.each do |property, value|
@@ -80,28 +78,55 @@ module Configurations
       @data.key?(property)
     end
 
+    # @return [Boolean] whether this configuration is empty
     def __empty?
       @data.empty?
     end
 
     protected
 
+    # Installs the given configuration methods for this configuration as singleton methods
+    #
     def __install_configuration_methods__
       @__methods__.each do |meth, block|
-        __define_singleton_method__(meth, &block)
+        __define_singleton_method__(meth, &block) if block.is_a?(::Proc)
       end
     end
 
+    # Instantiates an options hash for a nested property
+    # @param [Symbol] property the nested property to instantiate the hash for
+    # @return [Hash] a hash to be used for configuration initialization
+    #
     def __options_hash_for__(property)
       hash = {}
-      hash[:not_configured] = @__not_configured__[property] if @__not_configured__[property]
+      hash[:not_configured] = __not_configured_hash_for__(property) if @__not_configured__[property]
       hash[:methods] = @__methods__[property] if @__methods__.key?(property)
 
       hash
     end
 
+    # @param [Symbol] property the property to return the callback for
+    # @return [Proc] a block to use when property is called before configuration, defaults to a block yielding nil
+    #
     def __not_configured_callback_for__(property)
-      @__not_configured__[property] || ::Proc.new{ nil }
+      not_configured = @__not_configured__[property] || ::Proc.new{ nil }
+
+      unless not_configured.is_a?(::Proc)
+        blocks = __collect_blocks__(not_configured)
+        not_configured = ->(property){ blocks.each{ |b| b.call(property) } }
+      end
+
+      not_configured
+    end
+
+    # @param [Symbol] property the property to return the not configured hash option for
+    # @return [Hash] a hash which can be used as a not configured hash in options
+    #
+    def __not_configured_hash_for__(property)
+      hash = ::Hash.new(&@__not_configured__.default_proc)
+      hash.merge! @__not_configured__[property] if @__not_configured__[property].is_a?(::Hash)
+
+      hash
     end
 
     # @return [Hash] A configuration hash instantiating subhashes if the key is configurable
@@ -145,5 +170,19 @@ module Configurations
       method.to_s[0..-2].to_sym
     end
 
+    # @param [Hash] a hash to collect blocks from
+    # @return [Proc] a proc to call all the procs
+    #
+    def __collect_blocks__(hash)
+      hash.reduce([]) do |array, (k, v)|
+        array << if v.is_a?(::Hash)
+          __collect_blocks__(v)
+        else
+          v || k
+        end
+
+        array
+      end.flatten
+    end
   end
 end

@@ -3,8 +3,6 @@ module Configurations
   # Configuration is a blank object in order to allow configuration of various properties including keywords
   #
   class StrictConfiguration < Configuration
-    attr_reader :__configurable__
-
     # Initialize a new configuration
     # @param [Hash] options The options to initialize a configuration with
     # @option options [Hash] configurable a hash of configurable properties and their asserted types if given
@@ -25,7 +23,7 @@ module Configurations
     # @return [Boolean] whether the given property is configurable
     #
     def __configurable?(property)
-      __configurable__.key?(property) || @__nested_configurables__.key?(property)
+      @__configurable__.key?(property) || @__nested_configurables__.key?(property)
     end
 
     private
@@ -33,7 +31,7 @@ module Configurations
     # Evaluates configurable properties and passes eventual hashes down to subconfigurations
     #
     def __evaluate_configurable!
-      __configurable__.each do |k, assertion|
+      @__configurable__.each do |k, assertion|
         if k.is_a?(::Hash)
           k.each do |property, nested|
             __add_to_nested_configurables!(property, nested, assertion)
@@ -66,27 +64,42 @@ module Configurations
       hash
     end
 
+    # @param [Symbol] property the property to test for
+    # @return [Boolean] whether this property is pointing to a nested configuration
+    #
     def __nested?(property)
       respond_to?(property) && __send__(property).is_a?(__class__)
     end
 
+    # Installs a property setter and getter as singleton methods
+    # @param [Symbol] property the property to install
+    #
     def __install_property__(property)
       __install_setter__(property)
       __install_getter__(property)
     end
 
+    # Installs a property setter as a singleton method
+    # @param [Symbol] property the property to install the setter for
+    #
     def __install_setter__(property)
       __define_singleton_method__ :"#{property}=" do |value|
         __assign!(property, value)
       end
     end
 
+    # Installs a property getter as a singleton method
+    # @param [Symbol] property the property to install the getter for
+    #
     def __install_getter__(property)
       __define_singleton_method__ property do
         @data.fetch(property, &__not_configured_callback_for__(property))
       end
     end
 
+    # Installs a property getter for a nested configuration as a singleton method
+    # @param [Symbol] property the property to install the getter for
+    #
     def __install_nested_getter__(property)
       __define_singleton_method__ property do
         @data[property]
@@ -112,7 +125,7 @@ module Configurations
     def __assert_type!(property, value)
       return unless __evaluable?(property, :type)
 
-      assertion = __configurable__[property][:type]
+      assertion = @__configurable__[property][:type]
       ::Kernel.raise ConfigurationError, "Expected #{property} to be configured with #{assertion}, but got #{value.class.inspect}", caller unless value.is_a?(assertion)
     end
 
@@ -123,7 +136,7 @@ module Configurations
     def __evaluate_block!(property, value)
       return value unless __evaluable?(property, :block)
 
-      evaluation = __configurable__[property][:block]
+      evaluation = @__configurable__[property][:block]
       evaluation.call(value)
     end
 
@@ -132,7 +145,7 @@ module Configurations
     # @return [Boolean] whether the given property is assertable
     #
     def __evaluable?(property, evaluation)
-      __configurable?(property) && __configurable__[property].is_a?(::Hash) && __configurable__[property].key?(evaluation)
+      __configurable?(property) && @__configurable__[property].is_a?(::Hash) && @__configurable__[property].key?(evaluation)
     end
 
   end
