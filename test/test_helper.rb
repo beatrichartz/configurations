@@ -1,4 +1,4 @@
-require "codeclimate-test-reporter"
+require 'codeclimate-test-reporter'
 CodeClimate::TestReporter.start
 
 require 'pathname'
@@ -7,15 +7,16 @@ require 'minitest'
 PATH = Pathname.new(File.dirname(__FILE__))
 
 $LOAD_PATH.unshift PATH, File.expand_path('../../lib', __FILE__)
+require 'configurations'
 
 Dir[PATH.join('support', '**', '*.rb')].each(&method(:require))
+Dir[PATH.join('configurations', 'shared', '*.rb')].each(&method(:require))
 
-Minitest::Test.class_eval do
-  extend TestModules
+class ConfigurationsTest < Minitest::Test
+  include Test::Support::Setup
+  extend  Test::Support::Shared
 end
 
 require 'minitest/autorun'
 require 'minitest/pride'
 require 'test/unit/assertions'
-
-require 'configurations'
