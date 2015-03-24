@@ -32,7 +32,7 @@ Less time copy pasting configuration code, more time writing exciting code for y
 
 Go boom! with ease. This allows your gem / code users to set any value they like.
 
-```
+```ruby
 module MyGem
   include Configurations
 end
@@ -40,7 +40,7 @@ end
 
 Gives your users:
 
-```
+```ruby
 MyGem.configure do |c|
   c.foo.bar.baz = 'fizz'
   c.hi = 'Hello-o'
@@ -50,20 +50,20 @@ end
 
 Gives you:
 
-```
+```ruby
 MyGem.configuration.class #=> 'oooh wow'
 MyGem.configuration.foo.bar.baz #=> 'fizz'
 ```
 
 Undefined properties on an arbitrary configuration will return `nil`
 
-```
+```ruby
 MyGem.configuration.not_set #=> nil
 ```
 
 If you want to define the behaviour for not set properties yourself, use `not_configured`. You can either define a catch-all `not_configured` which will be executed whenever you call a value that has not been configured and has no default:
 
-```
+```ruby
 module MyGem
   not_configured do |prop|
 	raise NoMethodError, "#{prop} must be configured"
@@ -73,7 +73,7 @@ end
 
 Or you can define finer-grained callbacks:
 
-```
+```ruby
 module MyGem
   not_configured my: { nested: :prop } do |prop|
 	raise NoMethodError, "#{prop} must be configured"
@@ -85,7 +85,7 @@ end
 
 If you just want some properties to be configurable, consider this option
 
-```
+```ruby
 module MyGem
   include Configurations
   configurable :foo, bar: :baz, biz: %i(bi ba bu)
@@ -94,7 +94,7 @@ end
 
 Gives your users:
 
-```
+```ruby
 MyGem.configure do |c|
   c.foo = 'FOO'
   c.bar.baz = 'FIZZ'
@@ -108,20 +108,20 @@ end
 
 Gives you:
 
-```
+```ruby
 MyGem.configuration.foo #=> 'FOO'
 MyGem.configuration.bar.baz #=> 'FIZZ'
 ```
 
 Not configured properties on a restricted configuration will raise `NoMethodError`
 
-```
+```ruby
 MyGem.configuration.not_set #=> <#NoMethodError>
 ```
 
 If you want to define the behaviour for not set properties yourself, use `not_configured`. This will only affect properties set to configurable. All not configurable properties will raise `NoMethodError`.
 
-```
+```ruby
 module MyGem
   not_configured :awesome, :nice do |prop| # omit the arguments to get a catch-all not_configured
 	warn :not_configured, "Please configure #{prop} or live in danger"
@@ -133,7 +133,7 @@ end
 
 If you want to make sure your configurations only accept one type, consider this option
 
-```
+```ruby
 module MyGem
   include Configurations
   configurable String, :foo
@@ -143,7 +143,7 @@ end
 
 Gives your users:
 
-```
+```ruby
 MyGem.configure do |c|
   c.foo = 'FOO'
   c.bar.baz = %w(hello)
@@ -158,7 +158,7 @@ end
 
 If you need further assertions or you need to change a value before it gets stored in the configuration, consider passing a block
 
-```
+```ruby
 module MyGem
   include Configurations
   configurable :foo do |value|
@@ -181,7 +181,7 @@ end
 
 Gives your users:
 
-```
+```ruby
 MyGem.configure do |c|
   c.foo = 'FOO'
   c.bar.baz = %w(bi)
@@ -193,7 +193,7 @@ end
 
 Gives you:
 
-```
+```ruby
 MyGem.configuration.foo #=> 'FOO ooooh my'
 MyGem.configuration.bar.baz #=> one of %w(bi ba bu)
 ```
@@ -203,7 +203,7 @@ MyGem.configuration.bar.baz #=> one of %w(bi ba bu)
 You might want to define methods on your configuration which use configuration values to bring out another value.
 This is what `configuration_method` is here to help you with:
 
-```
+```ruby
 module MyGem
   include Configurations
   configurable :foo, :bar
@@ -215,7 +215,7 @@ end
 
 Your users do:
 
-```
+```ruby
 MyGem.configure do |c|
   c.foo = 'FOO'
   c.bar = 'BAR'
@@ -224,13 +224,13 @@ end
 
 You get:
 
-```
+```ruby
 MyGem.configuration.foobar('ARG') #=> 'FOOBARARG'
 ```
 
 configuration methods can also be installed on nested properties using hashes:
 
-```
+```ruby
 configuration_method foo: :bar do |arg|
   foo + bar + arg
 end
@@ -238,7 +238,7 @@ end
 
 ### Defaults:
 
-```
+```ruby
 module MyGem
   include Configurations
   configuration_defaults do |c|
@@ -249,7 +249,7 @@ end
 
 ### Get a hash if you need it
 
-```
+```ruby
 MyGem.configuration.to_h #=> a Hash
 ```
 
@@ -257,7 +257,7 @@ MyGem.configuration.to_h #=> a Hash
 
 Sometimes your users will have a hash of configuration values which are not handy to press into the block form. In that case, they can use `from_h` inside the `configure` block to either read in the full or a nested configuration. With a everything besides arbitrary configurations, `from_h` can also be used outside the block.
 
-```
+```ruby
 yaml_hash = YAML.load_file('configuration.yml')
 
 MyGem.configure do |c|
