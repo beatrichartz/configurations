@@ -6,11 +6,15 @@ Configurations provides a unified approach to do configurations using the `MyGem
 
 ## Install
 
-`gem install configurations`
+```ruby
+gem install configurations
+```
 
 or with Bundler
 
-`gem 'configurations', '~> 2.0.0'`
+```ruby
+gem 'configurations', '~> 2.0.0'
+```
 
 Configurations uses [Semver 2.0](http://semver.org/)
 
