@@ -2,7 +2,7 @@ require 'test_helper'
 
 class TestStrict < ConfigurationsTest
   setup_with :strict
-  shares_tests :properties, :properties_outside_block, :kernel_methods
+  shares_tests :is_a_configuration, :properties, :properties_outside_block, :kernel_methods
 
   def test_respond_to_writer
     assert_respond_to @configuration, :p1=

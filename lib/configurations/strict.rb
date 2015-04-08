@@ -3,7 +3,7 @@ module Configurations
   # StrictConfiguration is a blank object with setters and getters defined
   # according to the configurable settings given
   #
-  class StrictConfiguration < Configuration
+  module Strict
     # Initialize a new configuration
     # @param [Hash] options The options to initialize a configuration with
     # @option options [Hash] configurable a hash of configurable properties
@@ -48,6 +48,8 @@ module Configurations
       end
     end
 
+    # Add a property to a nested configurable
+    #
     def __add_to_nested_configurables!(property, nested, assertion)
       @__nested_configurables__ ||= ::Hash.new { |h, k| h[k] = {} }
       @__nested_configurables__[property].merge!(
@@ -55,6 +57,8 @@ module Configurations
       )
     end
 
+    # Get an options hash for a property
+    #
     def __options_hash_for__(property)
       super(property).merge(configurable: @__nested_configurables__[property])
     end

@@ -19,6 +19,9 @@ module Configurations
     #
     def install_configure_in(base)
       base.class_eval <<-EOF
+        # Configuration class for host module
+        #{base.name}::Configuration = Class.new(Configurations::Configuration)
+
         # The central configure method
         # @params [Proc] block the block to configure host module with
         # @raise [ArgumentError] error when not given a block
@@ -29,7 +32,9 @@ module Configurations
         #
         def self.configure(&block)
           fail ArgumentError, "configure needs a block" unless block_given?
-          @configuration = #{base.name}.const_get(configuration_type).new(
+          include_configuration_type!(#{base.name}::Configuration)
+
+          @configuration = #{base.name}::Configuration.new(
                                                           configuration_options,
                                                           &block
                                                         )
@@ -143,17 +148,26 @@ module Configurations
         end
       end
 
+      private
+
+      # Include the configuration type module into the host configuration class
+      #
+      def include_configuration_type!(base)
+        return if base.ancestors.include?(configuration_type)
+
+        base.send :include, configuration_type
+      end
+
       # @return the class name of the configuration class to use
       #
       def configuration_type
         if @configurable.nil? || @configurable.empty?
-          :ArbitraryConfiguration
+          Configurations::Arbitrary
         else
-          :StrictConfiguration
+          Configurations::Strict
         end
       end
 
-      private
 
       # Instantiates a configurable hash from a property and a type
       # @param [Symbol, Hash, Array] properties configurable properties,

@@ -3,7 +3,7 @@ module Configurations
   # Configuration is a blank object in order to allow configuration of
   # various properties including keywords
   #
-  class ArbitraryConfiguration < Configuration
+  module Arbitrary
     # Initialize a new configuration
     # @param [Hash] options The options to initialize a configuration with
     # @option options [Hash] methods a hash of method names pointing to procs
