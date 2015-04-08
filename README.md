@@ -20,7 +20,7 @@ Configurations uses [Semver 2.0](http://semver.org/)
 
 ## Compatibility
 
-Compatible with MRI 1.9.2 - 2.2, Rubinius 2.2, jRuby 1.7 and 9K
+Compatible with MRI 1.9.2 - 2.2, Rubinius 2.x, jRuby 1.7 and 9K
 
 ## Why?
 
