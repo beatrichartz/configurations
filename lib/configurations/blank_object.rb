@@ -8,6 +8,7 @@ module Configurations
       :equal?,
       :object_id,
       :__id__,
+      :__instance_variables__,
       :__send__,
       :method_missing
     ].freeze
@@ -26,11 +27,12 @@ module Configurations
       :respond_to?,
       :is_a?,
       :inspect,
+      :to_s,
       :object_id,
       # rbx needs the singleton class to access singleton methods
       :singleton_class,
       *ALIAS_KERNEL_METHODS.keys
-    ].freeze
+    ].compact.freeze
 
     # Undefines every instance method except the kept methods
     #
