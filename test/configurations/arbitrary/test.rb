@@ -1,7 +1,8 @@
 require 'test_helper'
 
 class TestArbitrary < ConfigurationsTest
-  shares_tests :is_a_configuration, :properties, :kernel_methods
+  shares_tests :instantiation, :is_a_configuration, :properties,
+               :kernel_methods
 
   def test_respond_to_on_writer_while_writeable
     TestModule.configure do |c|

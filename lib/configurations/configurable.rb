@@ -20,6 +20,7 @@ module Configurations
     def install_configure_in(base)
       base.class_eval <<-EOF
         # Configuration class for host module
+        #
         #{base.name}::Configuration = Class.new(Configurations::Configuration)
 
         # The central configure method
@@ -34,7 +35,7 @@ module Configurations
           fail ArgumentError, "configure needs a block" unless block_given?
           include_configuration_type!(#{base.name}::Configuration)
 
-          @configuration = #{base.name}::Configuration.new(
+          @configuration = #{base.name}::Configuration.__new__(
                                                           configuration_options,
                                                           &block
                                                         )

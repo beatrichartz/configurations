@@ -3,6 +3,14 @@ module Configurations
   # of various properties including keywords
   #
   class Configuration < BlankObject
+    class << self
+      # Make new a private method, but allow __new__ alias. Instantiating
+      # configurations is not part of the public API.
+      #
+      alias :__new__ :new
+      private :new
+    end
+
     # Initialize a new configuration
     # @param [Hash] options The options to initialize a configuration with
     # @option options [Hash] methods a hash of method names pointing to procs
@@ -139,7 +147,7 @@ module Configurations
     #
     def __configuration_hash__
       ::Hash.new do |h, k|
-        h[k] = __class__.new(__options_hash_for__(k)) if __configurable?(k)
+        h[k] = __class__.__new__(__options_hash_for__(k)) if __configurable?(k)
       end
     end
 
