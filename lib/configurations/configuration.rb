@@ -80,7 +80,7 @@ module Configurations
     #
     def inspect(debug=false)
       unless debug
-        "#<%s:0x00%x @data=%s>" % [__class__, __id__ << 1, @data.inspect]
+        "#<%s:0x00%x @data=%s>" % [__class__, object_id << 1, @data.inspect]
       else
         super()
       end
