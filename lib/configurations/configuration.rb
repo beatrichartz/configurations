@@ -73,6 +73,19 @@ module Configurations
       self
     end
 
+    # Inspect a configuration. Implements inspect without exposing internally
+    # used instance variables.
+    # @param [TrueClass, FalseClass] debug whether to show internals, defaults to false
+    # @return [String] The inspect output for this instance
+    #
+    def inspect(debug=false)
+      unless debug
+        "#<%s:0x00%x @data=%s>" % [__class__, __id__ << 1, @data.inspect]
+      else
+        super()
+      end
+    end
+
     # @param [Symbol] property The property to test for configurability
     # @return [Boolean] whether the given property is configurable
     #

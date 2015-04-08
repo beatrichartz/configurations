@@ -1,0 +1,23 @@
+module Tests
+  module Shared
+    module Inspect
+
+      def inspect_output(configuration)
+        "#<#{self.class.name}::TestModule::Configuration:0x00%x @data={}>" % [@configuration.__id__ << 1]
+      end
+
+      def test_non_debug_inspect
+        expected = inspect_output(@configuration)
+
+        assert @configuration.inspect == expected, "Expected inspect to produce output #{expected.inspect}, but got #{@configuration.inspect.inspect}"
+      end
+
+      def test_debug_inspect
+        non_debug = inspect_output(@configuration)
+
+        assert @configuration.inspect(true).size > non_debug.size, "Expected debug inspect to delegate to kernel and produce more output, but got #{@configuration.inspect(true).inspect}"
+      end
+
+    end
+  end
+end
