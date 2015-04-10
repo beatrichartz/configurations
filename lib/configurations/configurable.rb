@@ -79,7 +79,7 @@ module Configurations
       #   end
       #
       def configurable(*properties, &block)
-        type = properties.shift if properties.first.is_a?(Class)
+        type = properties.shift if properties.first.is_a?(Module)
 
         @configurable ||= {}
         @configurable.merge! to_configurable_hash(properties, type, &block)

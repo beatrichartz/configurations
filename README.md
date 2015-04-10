@@ -272,8 +272,17 @@ end
 
 ### Some caveats
 
-The `to_h` from above is along with `method_missing`, `object_id` and `initialize` and `singleton_class` the only purposely defined API method which you can not overwrite with a configuration value.
-Apart from these methods, you should be able to set pretty much any property name you like. `Configuration` inherits from `BasicObject`, so even `Kernel` and `Object` method names are available.
+#### Reserved Methods
+These are reserved methods on the configuration instance and should not be defined:
+- `initialize`
+- `inspect`
+- `method_missing`
+- `object_id`
+- `singleton_class`
+- `to_h`
+- `to_s`
+
+`Configuration` inherits from `BasicObject`, so method names defined through `Kernel` and `Object` are available.
 
 ## Contributing
 

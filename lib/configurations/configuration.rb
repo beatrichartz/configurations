@@ -3,6 +3,19 @@ module Configurations
   # of various properties including keywords
   #
   class Configuration < BlankObject
+    # Reserved methods are not assignable. They define behaviour needed for
+    # the configuration object to work properly.
+    #
+    RESERVED_METHODS = [
+      :initialize,
+      :inspect,
+      :method_missing,
+      :object_id,
+      :singleton_class, # needed by rbx
+      :to_h,
+      :to_s # needed by rbx / 1.9.3 for inspect
+    ]
+
     class << self
       # Make new a private method, but allow __new__ alias. Instantiating
       # configurations is not part of the public API.
@@ -112,6 +125,7 @@ module Configurations
     #
     def __install_configuration_methods__
       @__methods__.each do |meth, block|
+        __test_reserved!(meth)
         __define_singleton_method__(meth, &block) if block.is_a?(::Proc)
       end
     end
@@ -169,6 +183,7 @@ module Configurations
     # @param [Any] value the given value
     #
     def __assign!(property, value)
+      __test_reserved!(property)
       @data[property] = value
     end
 
@@ -196,6 +211,24 @@ module Configurations
     #
     def __property_from_writer__(method)
       method.to_s[0..-2].to_sym
+    end
+
+    # @param [Symbol] method the method to test for reservedness
+    # @raise [Configurations::ReservedMethodError] raises this error if
+    #    a property is a reserved method.
+    #
+    def __test_reserved!(method)
+      ::Kernel.fail(
+        ::Configurations::ReservedMethodError,
+        "#{method} is a reserved method and can not be assigned"
+      ) if __is_reserved?(method)
+    end
+
+    # @param [Symbol] method the method to test for
+    # @return [TrueClass, FalseClass] whether the method is reserved
+    #
+    def __is_reserved?(method)
+      RESERVED_METHODS.include?(method)
     end
 
     # @param [Hash] a hash to collect blocks from

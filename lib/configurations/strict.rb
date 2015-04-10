@@ -89,6 +89,7 @@ module Configurations
     # @param [Symbol] property the property to install
     #
     def __install_property__(property)
+      __test_reserved!(property)
       __install_setter__(property)
       __install_getter__(property)
     end

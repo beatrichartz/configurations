@@ -117,7 +117,7 @@ module Test
             configurable Hash, p3: { p5: :p7 }
             configurable Symbol, :class
             configurable Proc, :module
-            configurable Class, :puts
+            configurable Module, :puts
           end
         end
 
