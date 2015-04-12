@@ -1,3 +1,5 @@
+require 'thread'
+
 module Configurations
   # Module configurable provides the API of configurations
   #
@@ -9,16 +11,29 @@ module Configurations
     #
     def included(base)
       install_configure_in(base)
-      base.class_eval do
+      base.instance_eval do
         extend ClassMethods
+
+        # call configuration_mutex once to initialize the value
+        #
+        initialize_configuration!
       end
     end
+
+    def underscore_camelized(string)
+      string.gsub(/::/, '/').
+        gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').
+        gsub(/([a-z\d])([A-Z])/,'\1_\2').
+        tr("-", "_").
+        downcase
+    end
+
 
     # Installs #configure in base, and makes sure that it will instantiate
     # configuration as a subclass of the host module
     #
     def install_configure_in(base)
-      base.class_eval <<-EOF
+      base.instance_eval <<-EOF
         # Configuration class for host module
         #
         #{base.name}::Configuration = Class.new(Configurations::Configuration)
@@ -35,23 +50,39 @@ module Configurations
           fail ArgumentError, "configure needs a block" unless block_given?
           include_configuration_type!(#{base.name}::Configuration)
 
-          @configuration = #{base.name}::Configuration.__new__(
+          set_configuration!(&block)
+        end
+
+        # A reader for Configuration
+        #
+        def configuration
+          return Thread.current[configuration_name] if Thread.current.key?(configuration_name)
+
+          @configuration_defaults && set_configuration! {}
+        end
+
+
+        private
+
+        # Sets the configuration instance variable
+        #
+        def self.set_configuration!(&block)
+          Thread.current[configuration_name] = #{base.name}::Configuration.__new__(
                                                           configuration_options,
                                                           &block
                                                         )
         end
+
+        def self.configuration_name
+          :"#{underscore_camelized(base.name)}"
+        end
+
       EOF
     end
 
     # Class methods that will get installed in the host module
     #
     module ClassMethods
-      # A reader for Configuration
-      #
-      def configuration
-        @configuration ||= @configuration_defaults && configure {}
-      end
-
       # Configuration defaults can be used to set the defaults of
       # any Configuration
       # @param [Proc] block setting the default values of the configuration
@@ -151,6 +182,10 @@ module Configurations
 
       private
 
+      def initialize_configuration!
+        @configuration = nil
+      end
+
       # Include the configuration type module into the host configuration class
       #
       def include_configuration_type!(base)
@@ -247,6 +282,7 @@ module Configurations
       def zip_to_hash(value, *keys)
         Hash[keys.zip([value] * keys.size)]
       end
+
     end
   end
 end
