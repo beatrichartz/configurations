@@ -58,7 +58,7 @@ module Configurations
         def configuration
           return Thread.current[configuration_name] if Thread.current.key?(configuration_name)
 
-          @configuration_defaults && set_configuration! {}
+          @configuration_defaults && configure {}
         end
 
 

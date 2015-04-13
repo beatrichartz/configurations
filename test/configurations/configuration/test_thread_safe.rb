@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class TestConfigurationThreadSafe < ConfigurationsTest
+class TestConfigurationThreadSafe < MiniTest::Test
   module TestModule
     include Configurations
 
