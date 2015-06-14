@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class TestConfigurationThreadSafe < MiniTest::Test
+class TestConfigurationSharedNothing < MiniTest::Test
   module TestModule
     include Configurations
 
@@ -9,7 +9,7 @@ class TestConfigurationThreadSafe < MiniTest::Test
     end
   end
 
-  def test_thread_safe_default
+  def test_shared_nothing_default
     with_gc_disabled do
       ids = 1000.times.map do
         i = 0
@@ -26,7 +26,7 @@ class TestConfigurationThreadSafe < MiniTest::Test
     end
   end
 
-  def test_thread_safe_config
+  def test_shared_nothing_config
     there = TestModule.configuration.a
     t = Thread.new do
       TestModule.configure do |c|
