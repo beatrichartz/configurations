@@ -13,7 +13,7 @@ gem install configurations
 or with Bundler
 
 ```ruby
-gem 'configurations', '~> 2.0.0'
+gem 'configurations', '~> 2.1.0'
 ```
 
 Configurations uses [Semver 2.0](http://semver.org/)
