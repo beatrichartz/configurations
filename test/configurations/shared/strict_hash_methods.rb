@@ -6,6 +6,15 @@ module Tests
         assert_equal(expected, @module.configure { |c| c.from_h(input) }.to_h)
       end
 
+      def test_from_h_with_strings
+        expected, input = expection_and_input
+        string_input = Hash[input.map { |k, v| [k.to_s, v] }]
+        assert_equal(
+          expected,
+          @module.configure { |c| c.from_h(string_input) }.to_h
+        )
+      end
+
       def test_from_h_outside_block
         expected, input = expection_and_input
         assert_equal(expected, @configuration.from_h(input).to_h)

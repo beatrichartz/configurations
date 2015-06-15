@@ -35,6 +35,24 @@ module Tests
         old_to_h = @configuration.to_h.dup
         assert_equal(old_to_h, @module.configure { |c| c.from_h(old_to_h) }.to_h)
       end
+
+      def test_from_h_with_strings
+        old_to_h = @configuration.to_h.dup
+        string_to_h = Hash[old_to_h.map { |k, v| [k.to_s, v] }]
+        assert_equal(old_to_h, @module.configure { |c| c.from_h(string_to_h) }.to_h)
+      end
+
+      def test_from_h_with_ambiguous_strings_and_symbols
+        assert_raises Configurations::ConfigurationError do
+          @module.configure { |c| c.from_h('p1' => 'bla', :p1 => 'blu') }
+        end
+      end
+
+      def test_from_h_with_unambiguous_strings_and_symbols
+        c = @module.configure { |c| c.from_h('p1' => 'bla', :p2 => 2) }
+        assert_equal 2, c.p2
+        assert_equal 'bla', c.p1
+      end
     end
   end
 end

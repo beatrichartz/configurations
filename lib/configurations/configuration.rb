@@ -75,11 +75,13 @@ module Configurations
     # @return [Configuration] the configuration with values assigned
     #
     def from_h(h)
+      __test_ambiguity!(h)
       h.each do |property, value|
-        if value.is_a?(::Hash) && __nested?(property)
-          @data[property].from_h(value)
-        elsif __configurable?(property)
-          __assign!(property, value)
+        p = property.to_sym
+        if value.is_a?(::Hash) && __nested?(p)
+          @data[p].from_h(value)
+        elsif __configurable?(p)
+          __assign!(p, value)
         end
       end
 
@@ -222,6 +224,25 @@ module Configurations
         ::Configurations::ReservedMethodError,
         "#{method} is a reserved method and can not be assigned"
       ) if __is_reserved?(method)
+    end
+
+    # @param [Hash] the hash to test for ambiguity
+    # @raise [Configurations::ConfigurationError] raises this error if
+    #    a property is defined ambiguously
+    #
+    def __test_ambiguity!(h)
+      ambiguous = h.keys
+                    .partition { |k| k.is_a?(::Symbol) }
+                    .reduce { |a, b| a.map(&:to_s) & b }
+
+      unless ambiguous.empty?
+        ::Kernel.fail(
+          ::Configurations::ConfigurationError,
+          "Can not resolve configuration value: #{ambiguous.join(', ')} " <<
+          "defined as both Symbol and String keys. Please resolve the " <<
+          "ambiguity."
+        )
+      end
     end
 
     # @param [Symbol] method the method to test for
