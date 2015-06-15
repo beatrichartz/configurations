@@ -1,7 +1,7 @@
 class TestInspect < ConfigurationsTest
   setup_with {}
 
-  def inspect_output(configuration)
+  def inspect_output(_configuration)
     "#<#{self.class.name}::TestModule::Configuration:0x00%x @data={}>" % [@configuration.object_id << 1]
   end
 
@@ -16,5 +16,4 @@ class TestInspect < ConfigurationsTest
 
     refute @configuration.inspect(true) == non_debug, "Expected debug inspect to delegate to kernel and produce more output, but got #{@configuration.inspect(true).inspect}"
   end
-
 end

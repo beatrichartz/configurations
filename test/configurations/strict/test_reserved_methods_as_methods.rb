@@ -5,7 +5,7 @@ class TestStrictReservedMethodsAsMethods < ConfigurationsTest
     assert_raises Configurations::ReservedMethodError do
       @module.class_eval do
         configuration_method :to_h do
-          "h"
+          'h'
         end
       end
 

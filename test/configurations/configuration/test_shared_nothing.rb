@@ -42,10 +42,9 @@ class TestConfigurationSharedNothing < MiniTest::Test
     refute_equal here, there
   end
 
-  def with_gc_disabled(&block)
+  def with_gc_disabled(&_block)
     GC.disable
     yield
     GC.enable
   end
-
 end

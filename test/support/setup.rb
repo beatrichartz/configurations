@@ -45,7 +45,7 @@ module Test
 
           features.each do |feature|
             method = method(feature)
-            mod.module_eval{ |m| method.call(m) }
+            mod.module_eval { |m| method.call(m) }
           end
 
           @configuration_block = block if block_given?

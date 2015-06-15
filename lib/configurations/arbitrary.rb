@@ -50,7 +50,8 @@ module Configurations
     # @return [Configuration] the configuration with values assigned
     # @note can only be accessed during writeable state (in configure block).
     #   Unassignable values are ignored
-    # @raise [ArgumentError] unless used in writeable state (in configure block)
+    # @raise [ArgumentError] unless used in writeable state
+    #   (in configure block)
     #
     def from_h(h)
       unless @__writeable__
@@ -70,8 +71,8 @@ module Configurations
     # Set the configuration to writeable or read only. Access to writer methods
     # is only allowed within the configure block, this method is used to invoke
     # writeability for subconfigurations.
-    # @param [Boolean] data true if the configuration should be writeable, false
-    #   otherwise
+    # @param [Boolean] data true if the configuration should be writeable,
+    #   false otherwise
     #
     def __writeable__=(data)
       @__writeable__ = data
@@ -99,15 +100,16 @@ module Configurations
     end
 
     # @param [Symbol] method the method to test for
-    # @return [Boolean] whether the configuration responds to the given property
-    #   as a method during writeable state
+    # @return [Boolean] whether the configuration responds to the given
+    #   property as a method during writeable state
     #
     def __respond_to_method_for_write?(method)
       !__is_writer?(method) && @__writeable__ && @data[method].is_a?(__class__)
     end
 
     # @param [Symbol] method the method to test for
-    # @return [Boolean] whether the configuration responds to the given property
+    # @return [Boolean] whether the configuration responds to the
+    #   given property
     #
     def __respond_to_method_for_read?(method, *args, &block)
       !__is_writer?(method) && args.empty? && block.nil?

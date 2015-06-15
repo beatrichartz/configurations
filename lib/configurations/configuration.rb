@@ -20,7 +20,7 @@ module Configurations
       # Make new a private method, but allow __new__ alias. Instantiating
       # configurations is not part of the public API.
       #
-      alias :__new__ :new
+      alias_method :__new__, :new
       private :new
     end
 
@@ -73,6 +73,9 @@ module Configurations
     # A convenience accessor to instantiate a configuration from a hash
     # @param [Hash] h the hash to read into the configuration
     # @return [Configuration] the configuration with values assigned
+    # @raise [ConfigurationError] if the given hash ambiguous values
+    #     - string and symbol keys with the same string value pointing to
+    #     different values
     #
     def from_h(h)
       __test_ambiguity!(h)
@@ -90,12 +93,13 @@ module Configurations
 
     # Inspect a configuration. Implements inspect without exposing internally
     # used instance variables.
-    # @param [TrueClass, FalseClass] debug whether to show internals, defaults to false
+    # @param [TrueClass, FalseClass] debug whether to show internals, defaults
+    #     to false
     # @return [String] The inspect output for this instance
     #
-    def inspect(debug=false)
+    def inspect(debug = false)
       unless debug
-        "#<%s:0x00%x @data=%s>" % [__class__, object_id << 1, @data.inspect]
+        '#<%s:0x00%x @data=%s>' % [__class__, object_id << 1, @data.inspect]
       else
         super()
       end
@@ -138,7 +142,8 @@ module Configurations
     #
     def __options_hash_for__(property)
       hash = {}
-      hash[:not_configured] = __not_configured_hash_for__(property) if @__not_configured__[property]
+      hash[:not_configured] =
+        __not_configured_hash_for__(property) if @__not_configured__[property]
       hash[:methods] = @__methods__[property] if @__methods__.key?(property)
 
       hash
@@ -166,7 +171,9 @@ module Configurations
     #
     def __not_configured_hash_for__(property)
       hash = ::Hash.new(&@__not_configured__.default_proc)
-      hash.merge! @__not_configured__[property] if @__not_configured__[property].is_a?(::Hash)
+      hash.merge!(
+        @__not_configured__[property]
+      ) if @__not_configured__[property].is_a?(::Hash)
 
       hash
     end
@@ -232,15 +239,15 @@ module Configurations
     #
     def __test_ambiguity!(h)
       ambiguous = h.keys
-                    .partition { |k| k.is_a?(::Symbol) }
-                    .reduce { |a, b| a.map(&:to_s) & b }
+                  .partition { |k| k.is_a?(::Symbol) }
+                  .reduce { |a, b| a.map(&:to_s) & b }
 
       unless ambiguous.empty?
         ::Kernel.fail(
           ::Configurations::ConfigurationError,
-          "Can not resolve configuration value: #{ambiguous.join(', ')} " <<
-          "defined as both Symbol and String keys. Please resolve the " <<
-          "ambiguity."
+          "Can not resolve configuration value: #{ambiguous.join(', ')} " \
+          'defined as both Symbol and String keys. Please resolve the ' \
+          'ambiguity.'
         )
       end
     end

@@ -7,5 +7,4 @@ module Configurations
   # reserved methods
   #
   ReservedMethodError = Class.new(NameError)
-
 end

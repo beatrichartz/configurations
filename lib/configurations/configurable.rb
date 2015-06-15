@@ -21,13 +21,12 @@ module Configurations
     end
 
     def underscore_camelized(string)
-      string.gsub(/::/, '/').
-        gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').
-        gsub(/([a-z\d])([A-Z])/,'\1_\2').
-        tr("-", "_").
-        downcase
+      string.gsub(/::/, '/')
+        .gsub(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
+        .gsub(/([a-z\d])([A-Z])/, '\1_\2')
+        .tr('-', '_')
+        .downcase
     end
-
 
     # Installs #configure in base, and makes sure that it will instantiate
     # configuration as a subclass of the host module
@@ -56,7 +55,9 @@ module Configurations
         # A reader for Configuration
         #
         def configuration
-          return Thread.current[configuration_name] if Thread.current.key?(configuration_name)
+          return Thread.current[
+              configuration_name
+            ] if Thread.current.key?(configuration_name)
 
           @configuration_defaults && configure {}
         end
@@ -67,10 +68,12 @@ module Configurations
         # Sets the configuration instance variable
         #
         def self.set_configuration!(&block)
-          Thread.current[configuration_name] = #{base.name}::Configuration.__new__(
-                                                          configuration_options,
-                                                          &block
-                                                        )
+          Thread.current[
+              configuration_name
+            ] = #{base.name}::Configuration.__new__(
+                                                      configuration_options,
+                                                      &block
+                                                    )
         end
 
         def self.configuration_name
@@ -139,7 +142,10 @@ module Configurations
       #   end
       #
       def configuration_method(method, &block)
-        fail ArgumentError, "can't be configuration property and a method" if configurable?(method)
+        fail(
+          ArgumentError,
+          "can't be configuration property and a method"
+        ) if configurable?(method)
 
         @configuration_methods ||= {}
         method_hash = if method.is_a?(Hash)
@@ -203,7 +209,6 @@ module Configurations
           Configurations::Strict
         end
       end
-
 
       # Instantiates a configurable hash from a property and a type
       # @param [Symbol, Hash, Array] properties configurable properties,
@@ -282,7 +287,6 @@ module Configurations
       def zip_to_hash(value, *keys)
         Hash[keys.zip([value] * keys.size)]
       end
-
     end
   end
 end
