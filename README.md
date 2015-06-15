@@ -284,6 +284,13 @@ These are reserved methods on the configuration instance and should not be defin
 
 `Configuration` inherits from `BasicObject`, so method names defined through `Kernel` and `Object` are available.
 
+## Thread safety
+Configuration is shared-nothing: One configuration is defined per thread and no synchronization is taking place.
+Re-configuration via the `configure` block switches out the configuration in place rather than mutating its properties, so don't hold on to configuration objects in another context.
+That said, please bear in mind that keeping mutating state in configurations is as bad an idea as every other kind of global mutable state, if you expect values to change at runtime, configurations are not the right place to keep them:
+
+Encourage your users to configure once when initializing the environment, reconfigure on reload, but never ever at runtime.
+
 ## Contributing
 
 YES!
