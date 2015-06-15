@@ -76,10 +76,10 @@ module Configurations
     #
     def from_h(h)
       h.each do |property, value|
-        if value.is_a?(::Hash) && __nested?(property)
-          @data[property].from_h(value)
+        if value.is_a?(::Hash) && __nested?(property.to_sym)
+          @data[property.to_sym].from_h(value)
         elsif __configurable?(property)
-          __assign!(property, value)
+          __assign!(property.to_sym, value)
         end
       end
 
