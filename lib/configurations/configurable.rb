@@ -4,6 +4,30 @@ module Configurations
   # Module configurable provides the API of configurations
   #
   module Configurable
+    # A registry for configurations
+    #
+    class Registry
+      def initialize
+        @registry = {}
+        @semaphore = Mutex.new
+      end
+      def [](key)
+        @semaphore.synchronize do
+          @registry[key]
+        end
+      end
+      def []=(key, data)
+        @semaphore.synchronize do
+          @registry[key] = data
+        end
+      end
+      def key?(key)
+        @semaphore.synchronize do
+          @registry.key?(key)
+        end
+      end
+    end
+
     extend self
 
     # Once included, Configurations installs three methods in the host module:
@@ -55,9 +79,9 @@ module Configurations
         # A reader for Configuration
         #
         def configuration
-          return Thread.current[
+          return registry[
               configuration_name
-            ] if Thread.current.key?(configuration_name)
+            ] if registry.key?(configuration_name)
 
           @configuration_defaults && configure {}
         end
@@ -68,9 +92,7 @@ module Configurations
         # Sets the configuration instance variable
         #
         def self.set_configuration!(&block)
-          Thread.current[
-              configuration_name
-            ] = #{base.name}::Configuration.__new__(
+          registry[configuration_name] = #{base.name}::Configuration.__new__(
                                                       configuration_options,
                                                       &block
                                                     )
@@ -78,6 +100,12 @@ module Configurations
 
         def self.configuration_name
           :"#{underscore_camelized(base.name)}"
+        end
+
+        def self.registry
+          Thread.current[
+            :configurations_configuration_registry
+          ] ||= Registry.new
         end
 
       EOF
