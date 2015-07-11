@@ -4,30 +4,6 @@ module Configurations
   # Module configurable provides the API of configurations
   #
   module Configurable
-    # A registry for configurations
-    #
-    class Registry
-      def initialize
-        @registry = {}
-        @semaphore = Mutex.new
-      end
-      def [](key)
-        @semaphore.synchronize do
-          @registry[key]
-        end
-      end
-      def []=(key, data)
-        @semaphore.synchronize do
-          @registry[key] = data
-        end
-      end
-      def key?(key)
-        @semaphore.synchronize do
-          @registry.key?(key)
-        end
-      end
-    end
-
     extend self
 
     # Once included, Configurations installs three methods in the host module:
@@ -70,20 +46,25 @@ module Configurations
         #   end
         #
         def self.configure(&block)
-          fail ArgumentError, "configure needs a block" unless block_given?
-          include_configuration_type!(#{base.name}::Configuration)
+          semaphore.synchronize do
+            fail ArgumentError, "configure needs a block" unless block_given?
+            include_configuration_type!(#{base.name}::Configuration)
 
-          set_configuration!(&block)
+            set_configuration!(&block)
+          end
         end
 
         # A reader for Configuration
         #
         def configuration
-          return registry[
-              configuration_name
-            ] if registry.key?(configuration_name)
+          semaphore.synchronize do
+            return @configuration if @configuration
 
-          @configuration_defaults && configure {}
+            if @configuration_defaults
+              include_configuration_type!(#{base.name}::Configuration)
+              set_configuration! { }
+            end
+          end
         end
 
 
@@ -92,20 +73,15 @@ module Configurations
         # Sets the configuration instance variable
         #
         def self.set_configuration!(&block)
-          registry[configuration_name] = #{base.name}::Configuration.__new__(
+          @configuration = #{base.name}::Configuration.__new__(
                                                       configuration_options,
                                                       &block
                                                     )
         end
 
-        def self.configuration_name
-          :"#{underscore_camelized(base.name)}"
-        end
-
-        def self.registry
-          Thread.current[
-            :configurations_configuration_registry
-          ] ||= Registry.new
+        @semaphore = Mutex.new
+        def self.semaphore
+          @semaphore
         end
 
       EOF

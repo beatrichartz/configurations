@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class TestConfigurationSharedNothing < MiniTest::Test
+class TestConfigurationSynchronized < MiniTest::Test
   module TestModule
     include Configurations
 
@@ -9,24 +9,24 @@ class TestConfigurationSharedNothing < MiniTest::Test
     end
   end
 
-  def test_shared_nothing_default
+  def test_configuration_synchronized
     with_gc_disabled do
-      ids = 1000.times.map do
-        i = 0
-        t = Thread.new do
-          i = TestModule.configuration.object_id
+      ids = []
+      threads = 100.times.map do |i|
+        Thread.new do
+          sleep rand(1000) / 1000.0
+          ids << TestModule.configure do |c|
+            c.a = i
+          end.a
         end
+      end
+      threads.each(&:join)
 
-        t.join
-
-        i
-      end.map(&:object_id)
-
-      assert_equal 1000, ids.uniq.size
+      assert_equal 100, ids.uniq.size
     end
   end
 
-  def test_shared_nothing_config
+  def test_one_instance_mutation
     there = TestModule.configuration.a
     t = Thread.new do
       TestModule.configure do |c|
@@ -39,7 +39,7 @@ class TestConfigurationSharedNothing < MiniTest::Test
     t.join
     here = TestModule.configuration.a
 
-    refute_equal here, there
+    assert_equal here, there
   end
 
   def with_gc_disabled(&_block)
