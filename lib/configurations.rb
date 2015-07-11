@@ -16,5 +16,5 @@ module Configurations
 
   # Version number of Configurations
   #
-  VERSION = '2.1.0'
+  VERSION = '2.1.1'
 end
