@@ -35,6 +35,17 @@ class TestConfigurationSynchronized < MiniTest::Test
     assert_equal 100, collector.uniq.size
   end
 
+  class SyncTime
+    class << self
+      @@semaphore = Mutex.new
+      def now
+        @@semaphore.synchronize do
+          ("0.3f" % Time.now.to_f).to_f
+        end
+      end
+    end
+  end
+
   class WriteSequence
     attr_reader :list
 
@@ -57,7 +68,7 @@ class TestConfigurationSynchronized < MiniTest::Test
       end
       def add(value)
         semaphore.synchronize do
-          values << ["#{Time.now.to_i.to_s}#{Time.now.nsec}".to_i, value]
+          values << [SyncTime.now, value]
         end
       end
 
@@ -133,7 +144,8 @@ class TestConfigurationSynchronized < MiniTest::Test
 
     def raise_invalid_read!(time, value, valid_time, valid_value)
       raise "Invalid read: time: #{time.inspect}, value: #{value.inspect}. \
-Valid read would have been #{valid_value.inspect} (written at #{valid_time.inspect})."
+Valid read would have been #{valid_value.inspect} (written at #{valid_time.inspect}). \
+Time difference: #{valid_time - time}"
     end
   end
 
@@ -150,7 +162,7 @@ Valid read would have been #{valid_value.inspect} (written at #{valid_time.inspe
 
     def add(value)
       semaphore.synchronize do
-        @values << [Time.now.nsec, value]
+        @values << [SyncTime.now, value]
       end
     end
   end
@@ -158,7 +170,7 @@ Valid read would have been #{valid_value.inspect} (written at #{valid_time.inspe
   def test_serializable
     reads = ReadSequence.new
     writes = WriteSequence.build do |w|
-      threads = 20.times.flat_map do |i|
+      threads = 500.times.flat_map do |i|
         [
           Thread.new do
             sleep 0.001
