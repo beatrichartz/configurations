@@ -57,7 +57,7 @@ class TestConfigurationSynchronized < MiniTest::Test
       end
       def add(value)
         semaphore.synchronize do
-          values << [Time.now.nsec, value]
+          values << ["#{Time.now.to_i.to_s}#{Time.now.nsec}".to_i, value]
         end
       end
 
