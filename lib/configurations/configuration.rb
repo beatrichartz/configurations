@@ -34,7 +34,7 @@ module Configurations
       @__methods__ = options.fetch(:methods) { ::Hash.new }
       @__not_configured__ = options.fetch(:not_configured) { ::Hash.new }
 
-      @data = __configuration_hash__
+      @data = ::Configurations::Data.new(__configuration_hash__)
 
       __instance_eval__(&options[:defaults]) if options[:defaults]
       __instance_eval__(&block) if block
@@ -192,7 +192,6 @@ module Configurations
     # @param [Any] value the given value
     #
     def __assign!(property, value)
-      __test_reserved!(property)
       @data[property] = value
     end
 
