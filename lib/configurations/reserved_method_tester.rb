@@ -1,5 +1,8 @@
 module Configurations
   class ReservedMethodTester
+    # Reserved methods are not assignable. They define behaviour needed for
+    # the configuration object to work properly.
+    #
     RESERVED_METHODS = [
       :initialize,
       :inspect,

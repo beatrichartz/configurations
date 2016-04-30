@@ -16,6 +16,7 @@ module Configurations
     # @return [HostModule::Configuration] a configuration
     #
     def initialize(options = {}, &block)
+      @reserved_method_tester = ReservedMethodTester.new
       @__configurable__   = options.fetch(:configurable)
       __evaluate_configurable!
 
@@ -89,7 +90,7 @@ module Configurations
     # @param [Symbol] property the property to install
     #
     def __install_property__(property)
-      __test_reserved!(property)
+      @reserved_method_tester.test_reserved!(property)
       __install_setter__(property)
       __install_getter__(property)
     end
