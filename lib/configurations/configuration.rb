@@ -23,6 +23,7 @@ module Configurations
       @__not_configured__ = options.fetch(:not_configured) { ::Hash.new }
 
       @reserved_method_tester = ReservedMethodTester.new
+      @key_ambiguity_tester = KeyAmbiguityTester.new
       @data = ::Configurations::Data.new(__configuration_hash__)
 
       __instance_eval__(&options[:defaults]) if options[:defaults]
@@ -67,7 +68,7 @@ module Configurations
     #     different values
     #
     def from_h(h)
-      __test_ambiguity!(h)
+      @key_ambiguity_tester.test_ambiguity!(h)
       h.each do |property, value|
         p = property.to_sym
         if value.is_a?(::Hash) && __nested?(p)
@@ -208,24 +209,6 @@ module Configurations
     #
     def __property_from_writer__(method)
       method.to_s[0..-2].to_sym
-    end
-
-    # @param [Hash] the hash to test for ambiguity
-    # @raise [Configurations::ConfigurationError] raises this error if
-    #    a property is defined ambiguously
-    #
-    def __test_ambiguity!(h)
-      symbols, others = h.keys.partition { |k| k.is_a?(::Symbol) }
-      ambiguous = symbols.map(&:to_s) & others
-
-      unless ambiguous.empty?
-        ::Kernel.fail(
-          ::Configurations::ConfigurationError,
-          "Can not resolve configuration values for #{ambiguous.join(', ')} " \
-          "defined as both Symbol and #{others.first.class.name} keys. " \
-          'Please resolve the ambiguity.'
-        )
-      end
     end
 
     # @param [Hash] a hash to collect blocks from
