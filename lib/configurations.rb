@@ -7,6 +7,7 @@ require_relative 'configurations/error'
 require_relative 'configurations/key_ambiguity_tester'
 require_relative 'configurations/reserved_method_tester'
 require_relative 'configurations/strict'
+require_relative 'configurations/strict_configurable_tester'
 
 # Configurations provides a unified approach to do configurations
 # with the flexibility to do everything from arbitrary configurations
