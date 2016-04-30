@@ -99,7 +99,7 @@ module Configurations
     # @return [Boolean] whether the given property is configurable
     #
     def __configurable?(_property)
-      fail NotImplementedError, 'must be implemented in subclass'
+      @configurable_tester.configurable?(_property)
     end
 
     # @param [Symbol] property The property to test for

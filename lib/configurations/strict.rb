@@ -19,17 +19,10 @@ module Configurations
       @reserved_method_tester = ReservedMethodTester.new
 
       @__configurable__   = options.fetch(:configurable)
-      @strict_configurable_tester = StrictConfigurableTester.new(@__configurable__)
+      @configurable_tester = StrictConfigurableTester.new(@__configurable__)
       __evaluate_configurable!
 
       super
-    end
-
-    # @param [Symbol] property The property to test for configurability
-    # @return [Boolean] whether the given property is configurable
-    #
-    def __configurable?(property)
-      @strict_configurable_tester.configurable?(property)
     end
 
     private

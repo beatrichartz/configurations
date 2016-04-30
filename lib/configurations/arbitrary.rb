@@ -16,6 +16,7 @@ module Configurations
     #   therefore configuration is only possible in the initialization block
     #
     def initialize(options = {}, &block)
+      @configurable_tester = ArbitraryConfigurableTester.new
       self.__writeable__ = true
       super
       self.__writeable__ = false if block
@@ -59,13 +60,6 @@ module Configurations
       end
 
       super
-    end
-
-    # @param [Symbol] property The property to test for configurability
-    # @return [Boolean] whether the given property is configurable
-    #
-    def __configurable?(_property)
-      true
     end
 
     # Set the configuration to writeable or read only. Access to writer methods

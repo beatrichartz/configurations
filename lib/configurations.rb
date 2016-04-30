@@ -1,4 +1,5 @@
 require_relative 'configurations/arbitrary'
+require_relative 'configurations/arbitrary_configurable_tester'
 require_relative 'configurations/blank_object'
 require_relative 'configurations/configurable'
 require_relative 'configurations/configuration'
