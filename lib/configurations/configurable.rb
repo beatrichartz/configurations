@@ -117,9 +117,11 @@ module Configurations
       #   end
       #
       def configurable(*properties, &block)
+        @configurable_map ||= ConfigurableMap.new
         @configurable_type_map ||= ConfigurableTypeMap.new
         @configurable_block_map ||= ConfigurableBlockMap.new
         type, properties = extract_type(properties)
+        @configurable_map.add(properties)
         @configurable_type_map.add(type, properties)
         @configurable_block_map.add(block, properties)
 
@@ -259,6 +261,7 @@ module Configurations
           defaults: @configuration_defaults,
           methods_block_map: @configuration_methods_block_map,
           configurable: @configurable,
+          configurable_map: @configurable_map,
           configurable_type_map: @configurable_type_map,
           configurable_block_map: @configurable_block_map,
           not_configured_block_map: @not_configured_block_map,

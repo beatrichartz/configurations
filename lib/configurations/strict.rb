@@ -18,10 +18,10 @@ module Configurations
     def initialize(options = {}, &block)
       @reserved_method_tester = ReservedMethodTester.new
 
-      @__configurable__   = options.fetch(:configurable)
+      @__path__ = options.fetch(:path) { Path.new }
+      @__configurable_map__ = options.fetch(:configurable_map) { ::Configurations::ConfigurableMap.new }
       @__configurable_type_map__ = options.fetch(:configurable_type_map)
       @__configurable_block_map__ = options.fetch(:configurable_block_map)
-      @configurable_tester = StrictConfigurableTester.new(@__configurable__)
       __evaluate_configurable!
 
       super
@@ -33,25 +33,14 @@ module Configurations
     # down to subconfigurations
     #
     def __evaluate_configurable!
-      @__configurable__.each do |k, assertion|
-        if k.is_a?(::Hash)
-          k.each do |property, nested|
-            __add_to_nested_configurables!(property, nested, assertion)
-            __install_nested_getter__(property)
-          end
+      entries = @__configurable_map__.entries_at(@__path__)
+      entries.each do |property, value|
+        if value.is_a?(::Configurations::ConfigurableMap::Entry)
+          __install_property__(property)
         else
-          __install_property__(k)
+          __install_nested_getter__(property)
         end
       end
-    end
-
-    # Add a property to a nested configurable
-    #
-    def __add_to_nested_configurables!(property, nested, assertion)
-      @__nested_configurables__ ||= ::Hash.new { |h, k| h[k] = {} }
-      @__nested_configurables__[property].merge!(
-        __configurable_hash__(property, nested, assertion)
-      )
     end
 
     # Get an options hash for a property
@@ -59,24 +48,10 @@ module Configurations
     def __options_hash_for__(property)
       nested_path = @__path__.add(property)
       super(property).merge(
-        configurable: @__nested_configurables__[property],
+        configurable_map: @__configurable_map__,
         configurable_type_map: @__configurable_type_map__,
         configurable_block_map: @__configurable_block_map__,
         path: nested_path)
-    end
-
-    # @param [Symbol, Hash, Array] property configurable properties,
-    #   either single or nested
-    # @param [Symbol, Hash, Array] value configurable properties,
-    #   either single or nested
-    # @param [Hash] assertion assertion if any
-    # @return a hash with configurable values pointing to their types
-    #
-    def __configurable_hash__(_property, value, assertion)
-      value = [value] unless value.is_a?(::Array)
-      hash  = ::Hash[value.zip([assertion].flatten * value.size)]
-
-      hash
     end
 
     # @param [Symbol] property the property to test for

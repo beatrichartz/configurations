@@ -101,8 +101,12 @@ module Configurations
     # @param [Symbol] property The property to test for configurability
     # @return [Boolean] whether the given property is configurable
     #
-    def __configurable?(_property)
-      @configurable_tester.configurable?(_property)
+    def __configurable?(property)
+      if @__configurable_map__
+        @__configurable_map__.configurable?(@__path__.add(property))
+      else
+        true
+      end
     end
 
     # @param [Symbol] property The property to test for
@@ -139,6 +143,7 @@ module Configurations
 
       hash = {}
       hash[:path] = nested_path
+      hash[:configurable_map] = @__configurable_map__
       hash[:not_configured_block_map] = @__not_configured_block_map__
       hash[:not_configured_default_callback] = @__not_configured_default_callback__
       hash[:methods_block_map] = @__methods_block_map__

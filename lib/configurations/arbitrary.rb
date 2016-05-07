@@ -16,7 +16,6 @@ module Configurations
     #   therefore configuration is only possible in the initialization block
     #
     def initialize(options = {}, &block)
-      @configurable_tester = ArbitraryConfigurableTester.new
       self.__writeable__ = true
       super
       self.__writeable__ = false if block

@@ -1,7 +1,7 @@
 require_relative 'configurations/arbitrary'
-require_relative 'configurations/arbitrary_configurable_tester'
 require_relative 'configurations/blank_object'
 require_relative 'configurations/configurable'
+require_relative 'configurations/configurable_map'
 require_relative 'configurations/configurable_type_map'
 require_relative 'configurations/configurable_block_map'
 require_relative 'configurations/configuration'
@@ -11,7 +11,6 @@ require_relative 'configurations/key_ambiguity_tester'
 require_relative 'configurations/path'
 require_relative 'configurations/reserved_method_tester'
 require_relative 'configurations/strict'
-require_relative 'configurations/strict_configurable_tester'
 
 # Configurations provides a unified approach to do configurations
 # with the flexibility to do everything from arbitrary configurations
