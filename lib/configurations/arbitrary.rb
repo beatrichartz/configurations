@@ -31,7 +31,12 @@ module Configurations
       elsif __respond_to_method_for_write?(method)
         @data[method]
       elsif __respond_to_method_for_read?(method, *args, &block)
-        @data.fetch(method, &__not_configured_callback_for__(method))
+        @data.fetch(method) do
+          @__not_configured_block_map__.evaluate!(@__path__.add(method), method)
+          if @__not_configured_default_callback__
+            @__not_configured_default_callback__.call(method)
+          end
+        end
       else
         super
       end

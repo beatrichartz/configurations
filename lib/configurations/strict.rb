@@ -18,7 +18,6 @@ module Configurations
     def initialize(options = {}, &block)
       @reserved_method_tester = ReservedMethodTester.new
 
-      @__path__ = options.fetch(:path, Path.new)
       @__configurable__   = options.fetch(:configurable)
       @__configurable_type_map__ = options.fetch(:configurable_type_map)
       @__configurable_block_map__ = options.fetch(:configurable_block_map)
@@ -111,7 +110,12 @@ module Configurations
     #
     def __install_getter__(property)
       __define_singleton_method__ property do
-        @data.fetch(property, &__not_configured_callback_for__(property))
+        @data.fetch(property) do
+          @__not_configured_block_map__.evaluate!(@__path__.add(property), property)
+          if @__not_configured_default_callback__
+            @__not_configured_default_callback__.call(property)
+          end
+        end
       end
     end
 

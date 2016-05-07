@@ -19,8 +19,10 @@ module Configurations
     #   not_configured properties
 
     def initialize(options = {}, &block)
+      @__path__ = options.fetch(:path) { Path.new }
       @__methods__ = options.fetch(:methods) { ::Hash.new }
-      @__not_configured__ = options.fetch(:not_configured) { ::Hash.new }
+      @__not_configured_block_map__ = options.fetch(:not_configured_block_map) { ::Configurations::ConfigurableBlockMap.new }
+      @__not_configured_default_callback__ = options[:not_configured_default_callback]
 
       @reserved_method_tester = ReservedMethodTester.new
       @key_ambiguity_tester = KeyAmbiguityTester.new
@@ -131,39 +133,13 @@ module Configurations
     # @return [Hash] a hash to be used for configuration initialization
     #
     def __options_hash_for__(property)
+      nested_path = @__path__.add(property)
+
       hash = {}
-      hash[:not_configured] =
-        __not_configured_hash_for__(property) if @__not_configured__[property]
+      hash[:path] = nested_path
+      hash[:not_configured_block_map] = @__not_configured_block_map__
+      hash[:not_configured_default_callback] = @__not_configured_default_callback__
       hash[:methods] = @__methods__[property] if @__methods__.key?(property)
-
-      hash
-    end
-
-    # @param [Symbol] property the property to return the callback for
-    # @return [Proc] a block to use when property is called before
-    #   configuration, defaults to a block yielding nil
-    #
-    def __not_configured_callback_for__(property)
-      not_configured = @__not_configured__[property] || ::Proc.new { nil }
-
-      unless not_configured.is_a?(::Proc)
-        blocks = __collect_blocks__(not_configured)
-        not_configured = ->(p) { blocks.each { |b| b.call(p) } }
-      end
-
-      not_configured
-    end
-
-    # @param [Symbol] property the property to return the not
-    #   configured hash option for
-    # @return [Hash] a hash which can be used as a not configured
-    #   hash in options
-    #
-    def __not_configured_hash_for__(property)
-      hash = ::Hash.new(&@__not_configured__.default_proc)
-      hash.merge!(
-        @__not_configured__[property]
-      ) if @__not_configured__[property].is_a?(::Hash)
 
       hash
     end

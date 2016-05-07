@@ -195,12 +195,11 @@ module Configurations
       #   end
       #
       def not_configured(*properties, &block)
-        @not_configured ||= {}
+        @not_configured_block_map ||= ConfigurableBlockMap.new
+        @not_configured_block_map.add(block, properties)
 
         if properties.empty?
-          @not_configured.default_proc = ->(h, k) { h[k] = block }
-        else
-          nested_merge_not_configured_hash(*properties, &block)
+          @not_configured_default_callback = block
         end
       end
 
@@ -268,36 +267,9 @@ module Configurations
           configurable: @configurable,
           configurable_type_map: @configurable_type_map,
           configurable_block_map: @configurable_block_map,
-          not_configured: @not_configured
+          not_configured_block_map: @not_configured_block_map,
+          not_configured_default_callback: @not_configured_default_callback
         }.delete_if { |_, value| value.nil? }
-      end
-
-      # merges the properties given into a not_configured hash
-      # @param [Symbol, Hash, Array] properties the properties to merge
-      # @param [Proc] block the block to point the properties to when
-      #  not configured
-      #
-      def nested_merge_not_configured_hash(*properties, &block)
-        nested = properties.last.is_a?(Hash) ? properties.pop : {}
-        nested = ingest_configuration_block!(nested, &block)
-        props = zip_to_hash(block, *properties)
-
-        @not_configured.merge! nested, &method(:configuration_deep_merge)
-        @not_configured.merge! props, &method(:configuration_deep_merge)
-      end
-
-      # Solves merge conflicts when merging
-      # @param [Symbol] key the key that conflicts
-      # @param [Anything] oldval the value of the left side of the merge
-      # @param [Anything] newval the value of the right side of the merge
-      # @return a mergable value with conflicts solved
-      #
-      def configuration_deep_merge(_key, oldval, newval)
-        if oldval.is_a?(Hash) && newval.is_a?(Hash)
-          oldval.merge(newval, &method(:configuration_deep_merge))
-        else
-          Array(oldval) + Array(newval)
-        end
       end
 
       # Zip a value with keys to a hash so all keys point to the value
