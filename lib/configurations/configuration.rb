@@ -21,6 +21,7 @@ module Configurations
     def initialize(options = {}, &block)
       @__path__ = options.fetch(:path) { Path.new }
       @__methods__ = options.fetch(:methods) { ::Hash.new }
+      @__methods_block_map__ = options.fetch(:methods_block_map) { ::Configurations::ConfigurableBlockMap.new }
       @__not_configured_block_map__ = options.fetch(:not_configured_block_map) { ::Configurations::ConfigurableBlockMap.new }
       @__not_configured_default_callback__ = options[:not_configured_default_callback]
 
@@ -122,9 +123,10 @@ module Configurations
     # as singleton methods
     #
     def __install_configuration_methods__
-      @__methods__.each do |meth, block|
+      entries = @__methods_block_map__.entries_at(@__path__)
+      entries.each do |meth, entry|
         @reserved_method_tester.test_reserved!(meth)
-        __define_singleton_method__(meth, &block) if block.is_a?(::Proc)
+        __define_singleton_method__(meth, &entry.block)
       end
     end
 
@@ -139,6 +141,7 @@ module Configurations
       hash[:path] = nested_path
       hash[:not_configured_block_map] = @__not_configured_block_map__
       hash[:not_configured_default_callback] = @__not_configured_default_callback__
+      hash[:methods_block_map] = @__methods_block_map__
       hash[:methods] = @__methods__[property] if @__methods__.key?(property)
 
       hash
@@ -187,19 +190,5 @@ module Configurations
       method.to_s[0..-2].to_sym
     end
 
-    # @param [Hash] a hash to collect blocks from
-    # @return [Proc] a proc to call all the procs
-    #
-    def __collect_blocks__(hash)
-      hash.reduce([]) do |array, (k, v)|
-        array << if v.is_a?(::Hash)
-                   __collect_blocks__(v)
-                 else
-                   v || k
-                 end
-
-        array
-      end.flatten
-    end
   end
 end

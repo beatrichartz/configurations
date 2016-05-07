@@ -24,6 +24,11 @@ module Configurations
       end
     end
 
+    def entries_at(path)
+      entries = path.walk(@map) || {}
+      entries.dup.keep_if { |_, v| v.is_a?(Entry) }
+    end
+
     def evaluate!(path, value)
       entry = path.walk(@map)
       return value unless entry

@@ -165,14 +165,8 @@ module Configurations
           "can't be configuration property and a method"
         ) if configurable?(method)
 
-        @configuration_methods ||= {}
-        method_hash = if method.is_a?(Hash)
-                        ingest_configuration_block!(method, &block)
-                      else
-                        { method => block }
-                      end
-
-        @configuration_methods.merge! method_hash
+        @configuration_methods_block_map ||= ConfigurableBlockMap.new
+        @configuration_methods_block_map.add(block, [method])
       end
 
       # not_configured defines the behaviour when a property has not been
@@ -263,7 +257,7 @@ module Configurations
       def configuration_options
         {
           defaults: @configuration_defaults,
-          methods: @configuration_methods,
+          methods_block_map: @configuration_methods_block_map,
           configurable: @configurable,
           configurable_type_map: @configurable_type_map,
           configurable_block_map: @configurable_block_map,
