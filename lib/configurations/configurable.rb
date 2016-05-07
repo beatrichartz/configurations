@@ -117,10 +117,22 @@ module Configurations
       #   end
       #
       def configurable(*properties, &block)
+        @configurable_map ||= ConfigurableMap.new
+        type, properties = extract_type(properties)
+        @configurable_map.add(type, properties, block)
+
         type = properties.shift if properties.first.is_a?(Module)
 
         @configurable ||= {}
         @configurable.merge! to_configurable_hash(properties, type, &block)
+      end
+
+      def extract_type(properties)
+        if properties.first.is_a?(Module)
+          [properties.first, properties[1...properties.size]]
+        else
+          [nil, properties]
+        end
       end
 
       # returns whether a property is set to be configurable
@@ -252,6 +264,7 @@ module Configurations
           defaults: @configuration_defaults,
           methods: @configuration_methods,
           configurable: @configurable,
+          configurable_map: @configurable_map,
           not_configured: @not_configured
         }.delete_if { |_, value| value.nil? }
       end

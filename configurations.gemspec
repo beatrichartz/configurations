@@ -20,6 +20,7 @@ SUMMARY
   s.test_files        = `git ls-files -- test/*`.split("\n")
 
   s.add_development_dependency 'minitest', '~> 5.4'
+  s.add_development_dependency 'minitest-focus', '~> 1.1'
   s.add_development_dependency 'yard', '~> 0.8'
   s.add_development_dependency 'rake', '~> 10'
 end

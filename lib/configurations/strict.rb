@@ -18,7 +18,9 @@ module Configurations
     def initialize(options = {}, &block)
       @reserved_method_tester = ReservedMethodTester.new
 
+      @__path__ = options.fetch(:path, Path.new)
       @__configurable__   = options.fetch(:configurable)
+      @__configurable_map__   = options.fetch(:configurable_map)
       @configurable_tester = StrictConfigurableTester.new(@__configurable__)
       __evaluate_configurable!
 
@@ -55,7 +57,8 @@ module Configurations
     # Get an options hash for a property
     #
     def __options_hash_for__(property)
-      super(property).merge(configurable: @__nested_configurables__[property])
+      nested_path = @__path__.add(property)
+      super(property).merge(configurable: @__nested_configurables__[property], configurable_map: @__configurable_map__, path: nested_path)
     end
 
     # @param [Symbol, Hash, Array] property configurable properties,
@@ -134,16 +137,24 @@ module Configurations
     # @raise [ConfigurationError] if the given value has the wrong type
     #
     def __assert_type!(property, value)
-      return unless __evaluable?(property, :type)
+      @__configurable_map__.test!(@__path__.add(property), value)
+      # return unless __evaluable?(property, :type)
 
-      assertion = @__configurable__[property][:type]
-      return if value.is_a?(assertion)
+      # assertion = @__configurable__[property][:type]
+      # entry = @__path__.add(property).walk(@__configurable_map__.map)
 
-      ::Kernel.fail(
-        ConfigurationError,
-        "#{property} must be configured with #{assertion} (got #{value.class})",
-        caller
-      )
+      # if entry && entry.type != assertion
+      #   p "entry is #{entry.type}, assertion is #{assertion}"
+      # elsif !entry && assertion
+      #   p "entry is nil for #{@__path__.add(property).print}"
+      # end
+      # return if value.is_a?(assertion)
+
+      # ::Kernel.fail(
+      #   ConfigurationError,
+      #   "#{property} must be configured with #{assertion} (got #{value.class})",
+      #   caller
+      # )
     end
 
     # Block assertion for configurable properties
