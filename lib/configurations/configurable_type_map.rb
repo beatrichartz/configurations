@@ -1,13 +1,11 @@
 module Configurations
-  class ConfigurableMap
+  class ConfigurableTypeMap
     attr_reader :map
     class Entry
-      attr_reader :block
       attr_reader :type
 
-      def initialize(type, block)
+      def initialize(type)
         @type = type
-        @block = block
       end
 
       def valid?(value)
@@ -19,9 +17,9 @@ module Configurations
       @map = {}
     end
 
-    def add(type, properties, block)
+    def add(type, properties)
       properties.each do |property|
-        add_entry(property, type, block, @map)
+        add_entry(property, type, @map)
       end
     end
 
@@ -36,17 +34,17 @@ module Configurations
       ) unless entry.valid?(value)
     end
 
-    def add_entry(property, type, block, subtree)
+    def add_entry(property, type, subtree)
       if property.is_a?(Hash)
         property.each do |key, val|
-          subtree[key] = add_entry(val, type, block, subtree.fetch(key, {}))
+          subtree[key] = add_entry(val, type, subtree.fetch(key, {}))
         end
       elsif property.is_a?(Array)
         property.each do |val|
-          add_entry(val, type, block, subtree)
+          add_entry(val, type, subtree)
         end
       else
-        subtree[property] = Entry.new(type, block)
+        subtree[property] = Entry.new(type)
       end
 
       subtree
