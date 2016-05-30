@@ -192,7 +192,7 @@ module Configurations
         @not_configured_blocks.add(block, properties)
 
         if properties.empty?
-          @not_configured_default_callback = block
+          @not_configured_blocks.add_default(block)
         end
       end
 
@@ -229,8 +229,7 @@ module Configurations
           types: @configurable_types,
           blocks: @configurable_blocks,
           method_blocks: @configuration_method_blocks,
-          not_configured_blocks: @not_configured_blocks,
-          not_configured_default_callback: @not_configured_default_callback
+          not_configured_blocks: @not_configured_blocks
         }.delete_if { |_, value| value.nil? }
       end
     end

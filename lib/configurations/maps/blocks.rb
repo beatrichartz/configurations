@@ -19,6 +19,10 @@ module Configurations
         @map = {}
       end
 
+      def add_default(block)
+        @default = Entry.new(block)
+      end
+
       def add(block, properties)
         properties.each do |property|
           add_entry(property, block, @map)
@@ -31,8 +35,8 @@ module Configurations
       end
 
       def evaluate!(path, value)
-        entry = path.walk(@map)
-        return value unless entry
+        entry = path.walk(@map) || @default
+        return unless entry
 
         entry.evaluate!(value)
       end

@@ -24,9 +24,7 @@ module Configurations
 
       @methods = options.fetch(:methods) { ::Hash.new }
       @method_blocks = options.fetch(:method_blocks) { Maps::Blocks.new }
-
       @not_configured_blocks = options.fetch(:not_configured_blocks) { Maps::Blocks.new }
-      @not_configured_default_callback = options[:not_configured_default_callback]
 
       @reserved_method_validator = Validators::ReservedMethods.new
       @key_ambiguity_validator = Validators::Ambiguity.new
@@ -149,7 +147,6 @@ module Configurations
       hash[:properties] = @properties
 
       hash[:not_configured_blocks] = @not_configured_blocks
-      hash[:not_configured_default_callback] = @not_configured_default_callback
 
       hash[:method_blocks] = @method_blocks
       hash[:methods] = @methods[property] if @methods.key?(property)

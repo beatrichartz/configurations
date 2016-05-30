@@ -32,9 +32,6 @@ module Configurations
       elsif __respond_to_method_for_read?(method, *args, &block)
         @data.fetch(method) do
           @not_configured_blocks.evaluate!(@path.add(method), method)
-          if @not_configured_default_callback
-            @not_configured_default_callback.call(method)
-          end
         end
       else
         super

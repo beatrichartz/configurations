@@ -88,9 +88,6 @@ module Configurations
       __define_singleton_method__ property do
         @data.fetch(property) do
           @not_configured_blocks.evaluate!(@path.add(property), property)
-          if @not_configured_default_callback
-            @not_configured_default_callback.call(property)
-          end
         end
       end
     end
