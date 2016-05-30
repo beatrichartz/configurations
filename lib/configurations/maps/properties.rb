@@ -9,6 +9,10 @@ module Configurations
         @map = {}
       end
 
+      def empty?
+        @map.empty?
+      end
+
       def add(properties)
         properties.each do |property|
           add_entry(property, @map)

@@ -117,18 +117,14 @@ module Configurations
       #   end
       #
       def configurable(*properties, &block)
-        @configurable_map ||= Maps::Properties.new
+        @configurable_properties ||= Maps::Properties.new
         @configurable_types ||= Maps::Types.new
         @configurable_blocks ||= Maps::Blocks.new
+
         type, properties = extract_type(properties)
-        @configurable_map.add(properties)
+        @configurable_properties.add(properties)
         @configurable_types.add(type, properties)
         @configurable_blocks.add(block, properties)
-
-        type = properties.shift if properties.first.is_a?(Module)
-
-        @configurable ||= {}
-        @configurable.merge! to_configurable_hash(properties, type, &block)
       end
 
       def extract_type(properties)
@@ -144,7 +140,8 @@ module Configurations
       # @return [Boolean] whether the property is configurable
       #
       def configurable?(property)
-        @configurable.is_a?(Hash) && @configurable.key?(property)
+        @configurable_properties != nil &&
+          @configurable_properties.configurable?(Path.new([property]))
       end
 
       # configuration method can be used to retrieve properties
@@ -216,41 +213,10 @@ module Configurations
       # @return the class name of the configuration class to use
       #
       def configuration_type
-        if @configurable.nil? || @configurable.empty?
+        if @configurable_properties.nil? || @configurable_properties.empty?
           Configurations::Arbitrary
         else
           Configurations::Strict
-        end
-      end
-
-      # Instantiates a configurable hash from a property and a type
-      # @param [Symbol, Hash, Array] properties configurable properties,
-      #   either single or nested
-      # @param [Class] type the type to assert, if any
-      # @return a hash with configurable values pointing to their types
-      #
-      def to_configurable_hash(properties, type, &block)
-        assertion_hash = {}
-        assertion_hash.merge! block: block if block_given?
-        assertion_hash.merge! type: type if type
-
-        zip_to_hash(assertion_hash, *properties)
-      end
-
-      # Makes all values of hash point to block
-      # @param [Hash] hash the hash to modify
-      # @param [Proc] block the block to point to
-      # @return a hash with all previous values being keys pointing to block
-      #
-      def ingest_configuration_block!(hash, &block)
-        hash.each do |k, v|
-          value = if v.is_a?(Hash)
-                    ingest_configuration_block!(v, &block)
-                  else
-                    zip_to_hash(block, *Array(v))
-                  end
-
-          hash.merge! k => value
         end
       end
 
@@ -259,22 +225,13 @@ module Configurations
       def configuration_options
         {
           defaults: @configuration_defaults,
+          properties: @configurable_properties,
+          types: @configurable_types,
+          blocks: @configurable_blocks,
           method_blocks: @configuration_method_blocks,
-          configurable: @configurable,
-          configurable_map: @configurable_map,
-          configurable_types: @configurable_types,
-          configurable_blocks: @configurable_blocks,
           not_configured_blocks: @not_configured_blocks,
           not_configured_default_callback: @not_configured_default_callback
         }.delete_if { |_, value| value.nil? }
-      end
-
-      # Zip a value with keys to a hash so all keys point to the value
-      # @param [Anything] value the value to point to
-      # @param [Array] keys the keys to install
-      #
-      def zip_to_hash(value, *keys)
-        Hash[keys.zip([value] * keys.size)]
       end
     end
   end

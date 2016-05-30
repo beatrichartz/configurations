@@ -19,9 +19,9 @@ module Configurations
       @reserved_method_validator = Validators::ReservedMethods.new
 
       @path = options.fetch(:path) { Path.new }
-      @configurable_map = options.fetch(:configurable_map) { Maps::Properties.new }
-      @configurable_types = options.fetch(:configurable_types)
-      @configurable_blocks = options.fetch(:configurable_blocks)
+      @properties = options.fetch(:properties) { Maps::Properties.new }
+      @types = options.fetch(:types)
+      @blocks = options.fetch(:blocks)
       __evaluate_configurable!
 
       super
@@ -33,7 +33,7 @@ module Configurations
     # down to subconfigurations
     #
     def __evaluate_configurable!
-      entries = @configurable_map.entries_at(@path)
+      entries = @properties.entries_at(@path)
       entries.each do |property, value|
         if value.is_a?(Maps::Properties::Entry)
           __install_property__(property)
@@ -48,10 +48,11 @@ module Configurations
     def __options_hash_for__(property)
       nested_path = @path.add(property)
       super(property).merge(
-        configurable_map: @configurable_map,
-        configurable_types: @configurable_types,
-        configurable_blocks: @configurable_blocks,
-        path: nested_path)
+        properties: @properties,
+        types: @types,
+        blocks: @blocks,
+        path: nested_path
+      )
     end
 
     # @param [Symbol] property the property to test for
@@ -109,8 +110,8 @@ module Configurations
     # @param [Any] value the given value
     #
     def __assign!(property, value)
-      @configurable_types.test!(@path.add(property), value)
-      v = @configurable_blocks.evaluate!(@path.add(property), value)
+      @types.test!(@path.add(property), value)
+      v = @blocks.evaluate!(@path.add(property), value)
 
       value = v unless v.nil?
       super(property, value)

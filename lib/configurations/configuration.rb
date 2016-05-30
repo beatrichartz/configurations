@@ -105,8 +105,8 @@ module Configurations
     # @return [Boolean] whether the given property is configurable
     #
     def __configurable?(property)
-      if @configurable_map
-        @configurable_map.configurable?(@path.add(property))
+      if @configurable_properties
+        @configurable_properties.configurable?(@path.add(property))
       else
         true
       end
@@ -146,7 +146,7 @@ module Configurations
 
       hash = {}
       hash[:path] = nested_path
-      hash[:configurable_map] = @configurable_map
+      hash[:properties] = @properties
 
       hash[:not_configured_blocks] = @not_configured_blocks
       hash[:not_configured_default_callback] = @not_configured_default_callback
