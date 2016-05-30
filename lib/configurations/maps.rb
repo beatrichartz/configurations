@@ -1,3 +1,5 @@
 require_relative 'maps/blocks'
+require_relative 'maps/data'
 require_relative 'maps/types'
 require_relative 'maps/properties'
+require_relative 'maps/readers'

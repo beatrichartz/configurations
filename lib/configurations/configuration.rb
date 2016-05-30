@@ -21,6 +21,7 @@ module Configurations
     def initialize(options = {}, &block)
       @data = Data.new(__configuration_hash__)
       @path = options.fetch(:path) { Path.new }
+      @data_map = options.fetch(:data) { Maps::Data.new }
 
       @methods = options.fetch(:methods) { ::Hash.new }
       @method_blocks = options.fetch(:method_blocks) { Maps::Blocks.new }
@@ -144,6 +145,7 @@ module Configurations
 
       hash = {}
       hash[:path] = nested_path
+      hash[:data] = @data_map
       hash[:properties] = @properties
 
       hash[:not_configured_blocks] = @not_configured_blocks
@@ -168,6 +170,7 @@ module Configurations
     # @param [Any] value the given value
     #
     def __assign!(property, value)
+      @data_map.add_entry(property, value)
       @data[property] = value
     end
 

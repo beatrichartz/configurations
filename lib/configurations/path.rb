@@ -8,10 +8,8 @@ module Configurations
       Path.new(@path + path)
     end
 
-    def walk(map)
-      @path.reduce(map) do |map, value|
-        map[value] if map
-      end
+    def reduce(initial, &block)
+      @path.reduce(initial, &block)
     end
 
     def to_s

@@ -1,7 +1,6 @@
 module Configurations
   module Maps
     class Blocks
-      attr_reader :map
       class Entry
         attr_reader :block
 
@@ -15,8 +14,9 @@ module Configurations
         end
       end
 
-      def initialize
+      def initialize(reader = Readers::Tolerant.new)
         @map = {}
+        @reader = reader
       end
 
       def add_default(block)
@@ -30,12 +30,12 @@ module Configurations
       end
 
       def entries_at(path)
-        entries = path.walk(@map) || {}
+        entries = @reader.read(@map, path) || {}
         entries.dup.keep_if { |_, v| v.is_a?(Entry) }
       end
 
       def evaluate!(path, value)
-        entry = path.walk(@map) || @default
+        entry = @reader.read(@map, path) || @default
         return unless entry
 
         entry.evaluate!(value)

@@ -5,8 +5,9 @@ module Configurations
       class Entry
       end
 
-      def initialize
+      def initialize(reader = Readers::Tolerant.new)
         @map = {}
+        @reader = reader
       end
 
       def empty?
@@ -20,11 +21,11 @@ module Configurations
       end
 
       def entries_at(path)
-        path.walk(@map) || {}
+        @reader.read(@map, path) || {}
       end
 
       def configurable?(path)
-        !!path.walk(@map)
+        !!@reader.read(@map, path)
       end
 
       def add_entry(property, subtree)

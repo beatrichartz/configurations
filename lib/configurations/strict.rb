@@ -18,10 +18,11 @@ module Configurations
     def initialize(options = {}, &block)
       @reserved_method_validator = Validators::ReservedMethods.new
 
-      @path = options.fetch(:path) { Path.new }
+      @path       = options.fetch(:path) { Path.new }
       @properties = options.fetch(:properties) { Maps::Properties.new }
-      @types = options.fetch(:types)
-      @blocks = options.fetch(:blocks)
+      @types      = options.fetch(:types)
+      @blocks     = options.fetch(:blocks)
+
       __evaluate_configurable!
 
       super
@@ -50,8 +51,7 @@ module Configurations
       super(property).merge(
         properties: @properties,
         types: @types,
-        blocks: @blocks,
-        path: nested_path
+        blocks: @blocks
       )
     end
 

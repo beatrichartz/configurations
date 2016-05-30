@@ -14,8 +14,9 @@ module Configurations
         end
       end
 
-      def initialize
+      def initialize(reader = Readers::Tolerant.new)
         @map = {}
+        @reader = reader
       end
 
       def add(type, properties)
@@ -25,7 +26,7 @@ module Configurations
       end
 
       def test!(path, value)
-        entry = path.walk(@map)
+        entry = @reader.read(@map, path)
         return unless entry
 
         fail(
