@@ -19,15 +19,17 @@ module Configurations
     #   not_configured properties
 
     def initialize(options = {}, &block)
+      @data = Data.new(__configuration_hash__)
       @path = options.fetch(:path) { Path.new }
+
       @methods = options.fetch(:methods) { ::Hash.new }
-      @method_blocks = options.fetch(:method_blocks) { ::Configurations::ConfigurableBlockMap.new }
-      @not_configured_blocks = options.fetch(:not_configured_blocks) { ::Configurations::ConfigurableBlockMap.new }
+      @method_blocks = options.fetch(:method_blocks) { Maps::Blocks.new }
+
+      @not_configured_blocks = options.fetch(:not_configured_blocks) { Maps::Blocks.new }
       @not_configured_default_callback = options[:not_configured_default_callback]
 
-      @reserved_method_tester = ReservedMethodTester.new
-      @key_ambiguity_tester = KeyAmbiguityTester.new
-      @data = ::Configurations::Data.new(__configuration_hash__)
+      @reserved_method_validator = Validators::ReservedMethods.new
+      @key_ambiguity_validator = Validators::Ambiguity.new
 
       __instance_eval__(&options[:defaults]) if options[:defaults]
       __instance_eval__(&block) if block
@@ -71,7 +73,8 @@ module Configurations
     #     different values
     #
     def from_h(h)
-      @key_ambiguity_tester.test_ambiguity!(h)
+      @key_ambiguity_validator.validate!(h)
+
       h.each do |property, value|
         p = property.to_sym
         if value.is_a?(::Hash) && __nested?(p)
@@ -129,7 +132,7 @@ module Configurations
     def __install_configuration_methods__
       entries = @method_blocks.entries_at(@path)
       entries.each do |meth, entry|
-        @reserved_method_tester.test_reserved!(meth)
+        @reserved_method_validator.validate!(meth)
         __define_singleton_method__(meth, &entry.block)
       end
     end
@@ -144,8 +147,10 @@ module Configurations
       hash = {}
       hash[:path] = nested_path
       hash[:configurable_map] = @configurable_map
+
       hash[:not_configured_blocks] = @not_configured_blocks
       hash[:not_configured_default_callback] = @not_configured_default_callback
+
       hash[:method_blocks] = @method_blocks
       hash[:methods] = @methods[property] if @methods.key?(property)
 

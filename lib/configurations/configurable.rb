@@ -117,9 +117,9 @@ module Configurations
       #   end
       #
       def configurable(*properties, &block)
-        @configurable_map ||= ConfigurableMap.new
-        @configurable_types ||= ConfigurableTypeMap.new
-        @configurable_blocks ||= ConfigurableBlockMap.new
+        @configurable_map ||= Maps::Properties.new
+        @configurable_types ||= Maps::Types.new
+        @configurable_blocks ||= Maps::Blocks.new
         type, properties = extract_type(properties)
         @configurable_map.add(properties)
         @configurable_types.add(type, properties)
@@ -167,7 +167,7 @@ module Configurations
           "can't be configuration property and a method"
         ) if configurable?(method)
 
-        @configuration_method_blocks ||= ConfigurableBlockMap.new
+        @configuration_method_blocks ||= Maps::Blocks.new
         @configuration_method_blocks.add(block, [method])
       end
 
@@ -191,7 +191,7 @@ module Configurations
       #   end
       #
       def not_configured(*properties, &block)
-        @not_configured_blocks ||= ConfigurableBlockMap.new
+        @not_configured_blocks ||= Maps::Blocks.new
         @not_configured_blocks.add(block, properties)
 
         if properties.empty?

@@ -5,10 +5,10 @@ module Configurations
   class Data
     def initialize(
       data,
-      reserved_method_tester = ReservedMethodTester.new
+      reserved_method_validator = Validators::ReservedMethods.new
     )
       @data = data
-      @reserved_method_tester = reserved_method_tester
+      @reserved_method_validator = reserved_method_validator
     end
 
     def [](key)
@@ -16,7 +16,7 @@ module Configurations
     end
 
     def []=(key, value)
-      @reserved_method_tester.test_reserved!(key)
+      @reserved_method_validator.validate!(key)
 
       @data[key] = value
     end

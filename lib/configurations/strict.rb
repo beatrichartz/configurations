@@ -16,10 +16,10 @@ module Configurations
     # @return [HostModule::Configuration] a configuration
     #
     def initialize(options = {}, &block)
-      @reserved_method_tester = ReservedMethodTester.new
+      @reserved_method_validator = Validators::ReservedMethods.new
 
       @path = options.fetch(:path) { Path.new }
-      @configurable_map = options.fetch(:configurable_map) { ::Configurations::ConfigurableMap.new }
+      @configurable_map = options.fetch(:configurable_map) { Maps::Properties.new }
       @configurable_types = options.fetch(:configurable_types)
       @configurable_blocks = options.fetch(:configurable_blocks)
       __evaluate_configurable!
@@ -35,7 +35,7 @@ module Configurations
     def __evaluate_configurable!
       entries = @configurable_map.entries_at(@path)
       entries.each do |property, value|
-        if value.is_a?(::Configurations::ConfigurableMap::Entry)
+        if value.is_a?(Maps::Properties::Entry)
           __install_property__(property)
         else
           __install_nested_getter__(property)
@@ -66,7 +66,7 @@ module Configurations
     # @param [Symbol] property the property to install
     #
     def __install_property__(property)
-      @reserved_method_tester.test_reserved!(property)
+      @reserved_method_validator.validate!(property)
       __install_setter__(property)
       __install_getter__(property)
     end
