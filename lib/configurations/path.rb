@@ -14,9 +14,11 @@ module Configurations
       end
     end
 
-    def print
+    def to_s
       @path.join(".")
     end
+    alias :inspect :to_s
+    alias :print :to_s
 
   end
 end

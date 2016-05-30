@@ -19,11 +19,11 @@ module Configurations
     #   not_configured properties
 
     def initialize(options = {}, &block)
-      @__path__ = options.fetch(:path) { Path.new }
-      @__methods__ = options.fetch(:methods) { ::Hash.new }
-      @__methods_block_map__ = options.fetch(:methods_block_map) { ::Configurations::ConfigurableBlockMap.new }
-      @__not_configured_block_map__ = options.fetch(:not_configured_block_map) { ::Configurations::ConfigurableBlockMap.new }
-      @__not_configured_default_callback__ = options[:not_configured_default_callback]
+      @path = options.fetch(:path) { Path.new }
+      @methods = options.fetch(:methods) { ::Hash.new }
+      @method_blocks = options.fetch(:method_blocks) { ::Configurations::ConfigurableBlockMap.new }
+      @not_configured_blocks = options.fetch(:not_configured_blocks) { ::Configurations::ConfigurableBlockMap.new }
+      @not_configured_default_callback = options[:not_configured_default_callback]
 
       @reserved_method_tester = ReservedMethodTester.new
       @key_ambiguity_tester = KeyAmbiguityTester.new
@@ -102,8 +102,8 @@ module Configurations
     # @return [Boolean] whether the given property is configurable
     #
     def __configurable?(property)
-      if @__configurable_map__
-        @__configurable_map__.configurable?(@__path__.add(property))
+      if @configurable_map
+        @configurable_map.configurable?(@path.add(property))
       else
         true
       end
@@ -127,7 +127,7 @@ module Configurations
     # as singleton methods
     #
     def __install_configuration_methods__
-      entries = @__methods_block_map__.entries_at(@__path__)
+      entries = @method_blocks.entries_at(@path)
       entries.each do |meth, entry|
         @reserved_method_tester.test_reserved!(meth)
         __define_singleton_method__(meth, &entry.block)
@@ -139,15 +139,15 @@ module Configurations
     # @return [Hash] a hash to be used for configuration initialization
     #
     def __options_hash_for__(property)
-      nested_path = @__path__.add(property)
+      nested_path = @path.add(property)
 
       hash = {}
       hash[:path] = nested_path
-      hash[:configurable_map] = @__configurable_map__
-      hash[:not_configured_block_map] = @__not_configured_block_map__
-      hash[:not_configured_default_callback] = @__not_configured_default_callback__
-      hash[:methods_block_map] = @__methods_block_map__
-      hash[:methods] = @__methods__[property] if @__methods__.key?(property)
+      hash[:configurable_map] = @configurable_map
+      hash[:not_configured_blocks] = @not_configured_blocks
+      hash[:not_configured_default_callback] = @not_configured_default_callback
+      hash[:method_blocks] = @method_blocks
+      hash[:methods] = @methods[property] if @methods.key?(property)
 
       hash
     end

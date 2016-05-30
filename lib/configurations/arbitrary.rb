@@ -31,9 +31,9 @@ module Configurations
         @data[method]
       elsif __respond_to_method_for_read?(method, *args, &block)
         @data.fetch(method) do
-          @__not_configured_block_map__.evaluate!(@__path__.add(method), method)
-          if @__not_configured_default_callback__
-            @__not_configured_default_callback__.call(method)
+          @not_configured_blocks.evaluate!(@path.add(method), method)
+          if @not_configured_default_callback
+            @not_configured_default_callback.call(method)
           end
         end
       else
@@ -59,7 +59,7 @@ module Configurations
     #   (in configure block)
     #
     def from_h(h)
-      unless @__writeable__
+      unless @writeable
         fail ::ArgumentError, 'can not dynamically assign values from a hash'
       end
 
@@ -73,7 +73,7 @@ module Configurations
     #   false otherwise
     #
     def __writeable__=(data)
-      @__writeable__ = data
+      @writeable = data
       return if @data.nil?
 
       @data.each do |_k, v|
@@ -102,7 +102,7 @@ module Configurations
     #   property as a method during writeable state
     #
     def __respond_to_method_for_write?(method)
-      !__is_writer?(method) && @__writeable__ && @data[method].is_a?(__class__)
+      !__is_writer?(method) && @writeable && @data[method].is_a?(__class__)
     end
 
     # @param [Symbol] method the method to test for
@@ -118,7 +118,7 @@ module Configurations
     #   state
     #
     def __respond_to_writer?(method)
-      @__writeable__ && __is_writer?(method)
+      @writeable && __is_writer?(method)
     end
   end
 end

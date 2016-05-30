@@ -18,10 +18,10 @@ module Configurations
     def initialize(options = {}, &block)
       @reserved_method_tester = ReservedMethodTester.new
 
-      @__path__ = options.fetch(:path) { Path.new }
-      @__configurable_map__ = options.fetch(:configurable_map) { ::Configurations::ConfigurableMap.new }
-      @__configurable_type_map__ = options.fetch(:configurable_type_map)
-      @__configurable_block_map__ = options.fetch(:configurable_block_map)
+      @path = options.fetch(:path) { Path.new }
+      @configurable_map = options.fetch(:configurable_map) { ::Configurations::ConfigurableMap.new }
+      @configurable_types = options.fetch(:configurable_types)
+      @configurable_blocks = options.fetch(:configurable_blocks)
       __evaluate_configurable!
 
       super
@@ -33,7 +33,7 @@ module Configurations
     # down to subconfigurations
     #
     def __evaluate_configurable!
-      entries = @__configurable_map__.entries_at(@__path__)
+      entries = @configurable_map.entries_at(@path)
       entries.each do |property, value|
         if value.is_a?(::Configurations::ConfigurableMap::Entry)
           __install_property__(property)
@@ -46,11 +46,11 @@ module Configurations
     # Get an options hash for a property
     #
     def __options_hash_for__(property)
-      nested_path = @__path__.add(property)
+      nested_path = @path.add(property)
       super(property).merge(
-        configurable_map: @__configurable_map__,
-        configurable_type_map: @__configurable_type_map__,
-        configurable_block_map: @__configurable_block_map__,
+        configurable_map: @configurable_map,
+        configurable_types: @configurable_types,
+        configurable_blocks: @configurable_blocks,
         path: nested_path)
     end
 
@@ -86,9 +86,9 @@ module Configurations
     def __install_getter__(property)
       __define_singleton_method__ property do
         @data.fetch(property) do
-          @__not_configured_block_map__.evaluate!(@__path__.add(property), property)
-          if @__not_configured_default_callback__
-            @__not_configured_default_callback__.call(property)
+          @not_configured_blocks.evaluate!(@path.add(property), property)
+          if @not_configured_default_callback
+            @not_configured_default_callback.call(property)
           end
         end
       end
@@ -109,8 +109,8 @@ module Configurations
     # @param [Any] value the given value
     #
     def __assign!(property, value)
-      @__configurable_type_map__.test!(@__path__.add(property), value)
-      v = @__configurable_block_map__.evaluate!(@__path__.add(property), value)
+      @configurable_types.test!(@path.add(property), value)
+      v = @configurable_blocks.evaluate!(@path.add(property), value)
 
       value = v unless v.nil?
       super(property, value)

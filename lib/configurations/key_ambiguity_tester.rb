@@ -5,7 +5,10 @@ module Configurations
     #    a property is defined ambiguously
     #
     def test_ambiguity!(h)
-      symbols, others = h.keys.partition { |k| k.is_a?(::Symbol) }
+      symbols, others = h.keys.partition { |k|
+        k.is_a?(::Symbol)
+      }
+
       ambiguous = symbols.map(&:to_s) & others
 
       unless ambiguous.empty?

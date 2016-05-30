@@ -10,6 +10,7 @@ module Configurations
       @data = data
       @reserved_method_tester = reserved_method_tester
     end
+
     def [](key)
       @data[key]
     end

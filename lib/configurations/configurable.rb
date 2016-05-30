@@ -118,12 +118,12 @@ module Configurations
       #
       def configurable(*properties, &block)
         @configurable_map ||= ConfigurableMap.new
-        @configurable_type_map ||= ConfigurableTypeMap.new
-        @configurable_block_map ||= ConfigurableBlockMap.new
+        @configurable_types ||= ConfigurableTypeMap.new
+        @configurable_blocks ||= ConfigurableBlockMap.new
         type, properties = extract_type(properties)
         @configurable_map.add(properties)
-        @configurable_type_map.add(type, properties)
-        @configurable_block_map.add(block, properties)
+        @configurable_types.add(type, properties)
+        @configurable_blocks.add(block, properties)
 
         type = properties.shift if properties.first.is_a?(Module)
 
@@ -167,8 +167,8 @@ module Configurations
           "can't be configuration property and a method"
         ) if configurable?(method)
 
-        @configuration_methods_block_map ||= ConfigurableBlockMap.new
-        @configuration_methods_block_map.add(block, [method])
+        @configuration_method_blocks ||= ConfigurableBlockMap.new
+        @configuration_method_blocks.add(block, [method])
       end
 
       # not_configured defines the behaviour when a property has not been
@@ -191,8 +191,8 @@ module Configurations
       #   end
       #
       def not_configured(*properties, &block)
-        @not_configured_block_map ||= ConfigurableBlockMap.new
-        @not_configured_block_map.add(block, properties)
+        @not_configured_blocks ||= ConfigurableBlockMap.new
+        @not_configured_blocks.add(block, properties)
 
         if properties.empty?
           @not_configured_default_callback = block
@@ -259,12 +259,12 @@ module Configurations
       def configuration_options
         {
           defaults: @configuration_defaults,
-          methods_block_map: @configuration_methods_block_map,
+          method_blocks: @configuration_method_blocks,
           configurable: @configurable,
           configurable_map: @configurable_map,
-          configurable_type_map: @configurable_type_map,
-          configurable_block_map: @configurable_block_map,
-          not_configured_block_map: @not_configured_block_map,
+          configurable_types: @configurable_types,
+          configurable_blocks: @configurable_blocks,
+          not_configured_blocks: @not_configured_blocks,
           not_configured_default_callback: @not_configured_default_callback
         }.delete_if { |_, value| value.nil? }
       end
