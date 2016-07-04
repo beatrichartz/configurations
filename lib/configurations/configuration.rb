@@ -170,7 +170,7 @@ module Configurations
     # @param [Any] value the given value
     #
     def __assign!(property, value)
-      @data_map.add_entry(property, value)
+      @data_map.add_entry(@path.add(property), value)
       @data[property] = value
     end
 
