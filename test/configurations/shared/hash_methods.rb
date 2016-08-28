@@ -49,9 +49,9 @@ module Tests
       end
 
       def test_from_h_with_unambiguous_strings_and_symbols
-        c = @module.configure { |c| c.from_h('p1' => 'bla', :p2 => 2) }
-        assert_equal 2, c.p2
-        assert_equal 'bla', c.p1
+        config = @module.configure { |c| c.from_h('p1' => 'bla', :p2 => 2) }
+        assert_equal 2, config.p2
+        assert_equal 'bla', config.p1
       end
     end
   end
