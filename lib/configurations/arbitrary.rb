@@ -71,7 +71,7 @@ module Configurations
     #
     def __writeable__=(data)
       @writeable = data
-      return if @data.nil?
+      return unless defined?(@data) && @data
 
       @data.each do |_k, v|
         v.__writeable__ = data if v.is_a?(__class__)
