@@ -104,7 +104,7 @@ module Configurations
     # @return [Boolean] whether the given property is configurable
     #
     def __configurable?(property)
-      if @configurable_properties
+      if defined?(@configurable_properties) && @configurable_properties
         @configurable_properties.configurable?(@path.add(property))
       else
         true
@@ -146,7 +146,7 @@ module Configurations
       hash = {}
       hash[:path] = nested_path
       hash[:data] = @data_map
-      hash[:properties] = @properties
+      hash[:properties] = defined?(@properties) && @properties
 
       hash[:not_configured_blocks] = @not_configured_blocks
 
