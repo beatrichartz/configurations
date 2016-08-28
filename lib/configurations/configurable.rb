@@ -214,10 +214,10 @@ module Configurations
       # @return the class name of the configuration class to use
       #
       def configuration_type
-        if @configurable_properties.nil? || @configurable_properties.empty?
-          Configurations::Arbitrary
-        else
+        if defined?(@configurable_properties) && @configurable_properties && !@configurable_properties.empty?
           Configurations::Strict
+        else
+          Configurations::Arbitrary
         end
       end
 
