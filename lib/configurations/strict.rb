@@ -47,7 +47,7 @@ module Configurations
     # Get an options hash for a property
     #
     def __options_hash_for__(property)
-      nested_path = @path.add(property)
+      _nested_path = @path.add(property)
       super(property).merge(
         properties: @properties,
         types: @types,
