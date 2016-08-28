@@ -140,7 +140,8 @@ module Configurations
       # @return [Boolean] whether the property is configurable
       #
       def configurable?(property)
-        @configurable_properties != nil &&
+        defined?(@configurable_properties) &&
+          @configurable_properties &&
           @configurable_properties.configurable?(Path.new([property]))
       end
 
@@ -224,13 +225,19 @@ module Configurations
       #
       def configuration_options
         {
-          defaults: @configuration_defaults,
-          properties: @configurable_properties,
-          types: @configurable_types,
-          blocks: @configurable_blocks,
-          method_blocks: @configuration_method_blocks,
-          not_configured_blocks: @not_configured_blocks
-        }.delete_if { |_, value| value.nil? }
+          defaults:
+            defined?(@configuration_defaults) && @configuration_defaults,
+          properties:
+            defined?(@configurable_properties) && @configurable_properties,
+          types:
+            defined?(@configurable_types) && @configurable_types,
+          blocks:
+            defined?(@configurable_blocks) && @configurable_blocks,
+          method_blocks:
+            defined?(@configuration_method_blocks) && @configuration_method_blocks,
+          not_configured_blocks:
+            defined?(@not_configured_blocks) && @not_configured_blocks,
+        }.keep_if { |_, value| value }
       end
     end
   end
