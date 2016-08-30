@@ -17,6 +17,7 @@ module Configurations
       def initialize(reader = Readers::Tolerant.new)
         @map = {}
         @reader = reader
+        @default = nil
       end
 
       def add_default(block)

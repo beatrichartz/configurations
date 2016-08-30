@@ -40,7 +40,7 @@ class TestConfigurationSynchronized < MiniTest::Test
       @@semaphore = Mutex.new
       def now
         @@semaphore.synchronize do
-          ("0.3f" % Time.now.to_f).to_f
+          ("%0.3f" % Time.now.to_f).to_f
         end
       end
     end
