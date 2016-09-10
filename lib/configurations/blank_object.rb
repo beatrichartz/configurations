@@ -31,6 +31,11 @@ module Configurations
       :object_id,
       # rbx needs the singleton class to access singleton methods
       :singleton_class,
+      # rbx needs its private methods
+      :__instance_variable_defined_p__,
+      :__instance_variable_get__,
+      :__instance_variable_set__,
+      :__instance_variable__,
       *ALIAS_KERNEL_METHODS.keys
     ].compact.freeze
 
