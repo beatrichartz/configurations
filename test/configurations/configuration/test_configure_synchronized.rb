@@ -22,12 +22,10 @@ class TestConfigurationSynchronized < MiniTest::Test
     semaphore = Mutex.new
     threads = 100.times.map do |i|
       Thread.new do
-        sleep i%5 / 1000.0
-        value = TestModuleA.configure do |c|
+        sleep i%50 / 1000.0
+        collector << TestModuleA.configure do |c|
           c.a = i
         end.a
-
-        semaphore.synchronize { collector << value }
       end
     end
     threads.each(&:join)
