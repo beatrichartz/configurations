@@ -7,8 +7,12 @@ rvm:
   - 2.1.10
   - 2.2.5
   - 2.3.1
-  - rbx-3.68.0
+  - rbx-2
   - jruby-19mode
   - jruby-20mode
+
+matrix:
+  allow_failures:
+  - rvm: rbx-2
 
 script: rake && CODECLIMATE_REPO_TOKEN=36cf84c73264d3c361003f66903eec8aa5fb2b3494496f3a9676630518ecc9f9 codeclimate-test-reporter
