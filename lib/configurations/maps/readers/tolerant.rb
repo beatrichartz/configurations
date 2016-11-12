@@ -3,8 +3,8 @@ module Configurations
     module Readers
       class Tolerant
         def read(map, path)
-          path.reduce(map) do |map, value|
-            map[value] if map
+          path.reduce(map) do |m, value|
+            m[value] if m
           end
         end
       end

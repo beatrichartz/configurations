@@ -19,7 +19,6 @@ class TestConfigurationSynchronized < MiniTest::Test
 
   def test_configuration_synchronized
     collector = []
-    semaphore = Mutex.new
     threads = 100.times.map do |i|
       Thread.new do
         sleep i%50 / 1000.0
